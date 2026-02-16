@@ -36,7 +36,8 @@ const authConfig: NextAuthConfig = {
       return session;
     }
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  // Найди строку secret и замени её на эту:
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   trustHost: true
 };
 

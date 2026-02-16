@@ -1,10 +1,12 @@
 import Header from '@/components/layout/header';
 import Sidebar from '@/components/layout/sidebar';
 import type { Metadata } from 'next';
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'TeamPulse - Next.js/Shadcn dashboard',
-  description: 'Sophisticated dashboard Build with Next.js 14 and Shadcn UI components'
+  description:
+    'Sophisticated dashboard Build with Next.js 14 and Shadcn UI components'
 };
 
 export default function DashboardLayout({
