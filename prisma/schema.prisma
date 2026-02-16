@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Користувач системи
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  role          String    @default("user") // admin або user
+  balance       Float     @default(0)      // гроші на рахунку для купівлі
+  assets        UserAsset[]
+  createdAt     DateTime  @default(now())
+}
+
+// Актив (Річ), якою торгують (наприклад: "Золота монета", "Акція А")
+model Asset {
+  id           String   @id @default(cuid())
+  name         String
+  symbol       String   @unique // Короткий код, напр. GOLD, BTC
+  currentPrice Float
+  priceHistory PriceHistory[]
+  userAssets   UserAsset[]
+}
+
+// Історія цін для твоїх графіків
+model PriceHistory {
+  id        String   @id @default(cuid())
+  assetId   String
+  price     Float
+  createdAt DateTime @default(now())
+  asset     Asset    @relation(fields: [assetId], references: [id])
+}
+
+// Портфель користувача (що він купив)
+model UserAsset {
+  id        String   @id @default(cuid())
+  userId    String
+  assetId   String
+  quantity  Float    // Кількість одиниць у власності
+  user      User     @relation(fields: [userId], references: [id])
+  asset     Asset    @relation(fields: [assetId], references: [id])
+}
