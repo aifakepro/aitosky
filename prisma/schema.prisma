@@ -15,18 +15,41 @@ model User {
   emailVerified DateTime?
   image         String?
   
-  // Твои кастомные поля
+  // Существующие поля
   role          String    @default("user")
   balance       Float     @default(0)
-  lastLoginAt   DateTime?  
+  lastLoginAt   DateTime?
+  
+  // Новые поля из формы профиля
+  firstname     String?
+  lastname      String?
+  contactno     String?
+  country       String?
+  city          String?
   
   // Связи
   accounts      Account[]
   sessions      Session[]
   assets        UserAsset[]
+  jobs          Job[]     // для опыта работы
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+}
+
+// Новая таблица для опыта работы
+model Job {
+  id          String   @id @default(cuid())
+  userId      String
+  jobtitle    String
+  employer    String
+  startdate   String
+  enddate     String?
+  jobcountry  String
+  jobcity     String
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
 }
 
 model Account {

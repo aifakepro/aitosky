@@ -116,11 +116,37 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
     }
   };
 
-  const processForm: SubmitHandler<ProfileFormValues> = (data) => {
+  const processForm: SubmitHandler<ProfileFormValues> = async (data) => {
     console.log('data ==>', data);
     setData(data);
-    // api call and reset
-    // form.reset();
+
+    // Если мы на последнем шаге - отправляем на сервер
+    if (currentStep === steps.length - 1) {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/user/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save profile');
+        }
+
+        const result = await response.json();
+        console.log('Profile saved:', result);
+
+        // Успешно сохранено - перенаправляем
+        router.push('/dashboard');
+        router.refresh();
+      } catch (error) {
+        console.error('Error saving profile:', error);
+        alert('Failed to save profile. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   type FieldName = keyof ProfileFormValues;
@@ -580,11 +606,24 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
               </>
             )}
             {currentStep === 2 && (
-              <div>
-                <h1>Completed</h1>
-                <pre className="whitespace-pre-wrap">
-                  {JSON.stringify(data)}
+              <div className="space-y-4">
+                <h1 className="text-2xl font-semibold">Completed</h1>
+                <p className="text-muted-foreground">
+                  Review your information before saving
+                </p>
+                <pre className="whitespace-pre-wrap rounded-md bg-muted p-4">
+                  {JSON.stringify(data, null, 2)}
                 </pre>
+                <Button
+                  onClick={async () => {
+                    await processForm(data as ProfileFormValues);
+                  }}
+                  disabled={loading}
+                  size="lg"
+                  className="w-full"
+                >
+                  {loading ? 'Saving...' : 'Save Profile'}
+                </Button>
               </div>
             )}
           </div>
