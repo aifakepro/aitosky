@@ -10,12 +10,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const userId = session.user.id; // ← СОХРАНИТЕ В ПЕРЕМЕННУЮ
+
     const body = await req.json();
     const { firstname, lastname, email, contactno, country, city, jobs } = body;
 
     // Обновляем профиль
     const updatedUser = await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: userId },
       data: {
         firstname,
         lastname,
@@ -29,14 +31,14 @@ export async function POST(req: Request) {
 
     // Удаляем старые jobs и создаём новые
     await prisma.job.deleteMany({
-      where: { userId: session.user.id }
+      where: { userId }
     });
 
     if (jobs && jobs.length > 0) {
       await prisma.job.createMany({
         data: jobs.map((job: any) => ({
           ...job,
-          userId: session.user.id
+          userId // ← ИСПОЛЬЗУЙТЕ ПЕРЕМЕННУЮ
         }))
       });
     }
