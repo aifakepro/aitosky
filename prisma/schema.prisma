@@ -15,9 +15,10 @@ model User {
   emailVerified DateTime?
   image         String?
   
-    // Твои кастомные поля
+  // Твои кастомные поля
   role          String    @default("user") // "admin" или "user"
   balance       Float     @default(0)      // деньги на счету
+  lastLoginAt   DateTime? // ← ДОБАВЬТЕ ЭТУ СТРОКУ
   
   // Связи
   accounts      Account[]
