@@ -1,10 +1,10 @@
-import 'dotenv/config'; // ЦЕЙ РЯДОК ОБОВ'ЯЗКОВИЙ
+import 'dotenv/config';
 import { defineConfig } from '@prisma/config';
 
 export default defineConfig({
   schema: './prisma/schema.prisma',
   datasource: {
-    // Тепер він побачить вашу змінну з файлу .env
+    // ← ЕДИНСТВЕННОЕ ЧИСЛО (ошибка показывает что нужно datasource)
     url: process.env.DATABASE_URL
   }
 });
