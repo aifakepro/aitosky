@@ -72,7 +72,9 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  // Добавляем .catch, чтобы билд не падал, если сессия не может провериться при сборке
+  const session = await auth().catch(() => null);
+
   return (
     <html lang="en">
       <body
