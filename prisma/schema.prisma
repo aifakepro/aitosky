@@ -6,42 +6,93 @@ datasource db {
   provider = "postgresql"
 }
 
-// Користувач системи
+// --- ТАБЛИЦЫ ДЛЯ AUTH.JS (NEXTAUTH) ---
+
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
-  role          String    @default("user") // admin або user
-  balance       Float     @default(0)      // гроші на рахунку для купівлі
+  emailVerified DateTime?
+  image         String?
+  
+  // Твои кастомные поля
+  role          String    @default("user") // "admin" или "user"
+  balance       Float     @default(0)      // деньги на счету
+  
+  // Связи
+  accounts      Account[]
+  sessions      Session[]
   assets        UserAsset[]
+  
   createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
-// Актив (Річ), якою торгують (наприклад: "Золота монета", "Акція А")
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// --- ТВОЯ ЛОГИКА АКТИВОВ ---
+
+// Актив (Вещь), которой торгуют (напр: "Золото", "BTC")
 model Asset {
   id           String   @id @default(cuid())
   name         String
-  symbol       String   @unique // Короткий код, напр. GOLD, BTC
+  symbol       String   @unique // Код, напр. GOLD, BTC
   currentPrice Float
+  
   priceHistory PriceHistory[]
   userAssets   UserAsset[]
 }
 
-// Історія цін для твоїх графіків
+// История цен для графиков
 model PriceHistory {
   id        String   @id @default(cuid())
   assetId   String
   price     Float
   createdAt DateTime @default(now())
-  asset     Asset    @relation(fields: [assetId], references: [id])
+  
+  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
 }
 
-// Портфель користувача (що він купив)
+// Портфель пользователя (что он купил)
 model UserAsset {
   id        String   @id @default(cuid())
   userId    String
   assetId   String
-  quantity  Float    // Кількість одиниць у власності
-  user      User     @relation(fields: [userId], references: [id])
-  asset     Asset    @relation(fields: [assetId], references: [id])
+  quantity  Float    // Сколько единиц купил
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
 }
