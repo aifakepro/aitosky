@@ -16,8 +16,9 @@ model User {
   image         String?
   
   // Твои кастомные поля
-  role          String    @default("user") // "admin" или "user"
-  balance       Float     @default(0)      // деньги на счету
+  role          String    @default("user")
+  balance       Float     @default(0)
+  lastLoginAt   DateTime?  
   
   // Связи
   accounts      Account[]

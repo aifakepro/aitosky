@@ -1,6 +1,7 @@
 import { NextAuthConfig } from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Github from 'next-auth/providers/github';
+import { prisma } from '@/lib/prisma';
 
 const authConfig: NextAuthConfig = {
   providers: [
@@ -16,27 +17,32 @@ const authConfig: NextAuthConfig = {
   pages: {
     signIn: '/'
   },
+  events: {
+    async signIn({ user }) {
+      if (user?.id) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lastLoginAt: new Date() }
+        });
+      }
+    }
+  },
   callbacks: {
-    // Выполняется при создании JWT токена
     async jwt({ token, user }) {
       if (user) {
-        // Когда юзер только залогинился, берем его роль из базы и кладем в токен
         token.role = (user as any).role;
         token.id = user.id;
       }
       return token;
     },
-    // Выполняется при проверке сессии в браузере
     async session({ session, token }) {
       if (session.user) {
-        // Передаем роль и ID из токена в сессию
         (session.user as any).role = token.role;
         (session.user as any).id = token.id as string;
       }
       return session;
     }
   },
-  // Найди строку secret и замени её на эту:
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   trustHost: true
 };
