@@ -7,6 +7,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useSidebar } from '@/hooks/useSidebar';
 import Link from 'next/link';
 import { Icons } from '../icons';
+import { useSession } from 'next-auth/react'; // Додаємо цей імпорт
 
 type SidebarProps = {
   className?: string;
@@ -14,23 +15,36 @@ type SidebarProps = {
 
 export default function Sidebar({ className }: SidebarProps) {
   const { isMinimized, toggle } = useSidebar();
+  const { data: session } = useSession(); // Отримуємо дані сесії
 
   const handleToggle = () => {
     toggle();
   };
 
+  // Отримуємо роль (якщо сесії немає, вважаємо, що це 'user')
+  const userRole = (session?.user as any)?.role || 'user';
+
+  // Фільтруємо пункти меню на основі ролі
+  const filteredNavItems = navItems.filter((item) => {
+    // Якщо у пункту меню прописані ролі, перевіряємо чи входить туди роль юзера
+    // Якщо ролі не прописані — показуємо всім
+    if (item.roles) {
+      return item.roles.includes(userRole);
+    }
+    return true;
+  });
+
   return (
     <aside
       className={cn(
-        `relative  hidden h-screen flex-none border-r bg-card transition-[width] duration-500 md:block`,
+        `relative hidden h-screen flex-none border-r bg-card transition-[width] duration-500 md:block`,
         !isMinimized ? 'w-72' : 'w-[72px]',
         className
       )}
     >
       <div className="hidden p-5 pt-10 lg:block">
         <Link
-          href={'https://github.com/manju1807/TeamPulse'}
-          target="_blank"
+          href={'/dashboard'}
           className='flex flex-row'
         >
           <Icons.logo />
@@ -39,7 +53,7 @@ export default function Sidebar({ className }: SidebarProps) {
       </div>
       <ChevronLeft
         className={cn(
-          'absolute -right-3 top-10 z-50  cursor-pointer rounded-full border bg-background text-3xl text-foreground',
+          'absolute -right-3 top-10 z-50 cursor-pointer rounded-full border bg-background text-3xl text-foreground',
           isMinimized && 'rotate-180'
         )}
         onClick={handleToggle}
@@ -47,7 +61,8 @@ export default function Sidebar({ className }: SidebarProps) {
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <div className="mt-3 space-y-1">
-            <DashboardNav items={navItems} />
+            {/* Передаємо ВІДФІЛЬТРОВАНІ пункти */}
+            <DashboardNav items={filteredNavItems} />
           </div>
         </div>
       </div>
