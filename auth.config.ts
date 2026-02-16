@@ -1,7 +1,7 @@
 import { NextAuthConfig } from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Github from 'next-auth/providers/github';
-import { prisma } from '@/lib/prisma';
+// УДАЛИТЕ: import { prisma } from '@/lib/prisma';
 
 const authConfig: NextAuthConfig = {
   providers: [
@@ -17,16 +17,7 @@ const authConfig: NextAuthConfig = {
   pages: {
     signIn: '/'
   },
-  events: {
-    async signIn({ user }) {
-      if (user?.id) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { lastLoginAt: new Date() }
-        });
-      }
-    }
-  },
+  // УДАЛИТЕ EVENTS - они не работают в edge
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
