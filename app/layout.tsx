@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import Providers from '@/components/layout/providers';
 import { Toaster } from '@/components/ui/toaster';
 import '@uploadthing/react/styles.css';
@@ -12,13 +13,16 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   metadataBase: new URL('https://teampulse18.netlify.app/'),
   title: 'TeamPulse - Next.js/Shadcn Dashboard',
-  description: 'Sophisticated dashboard built with Next.js 14 and Shadcn UI components for efficient team management and productivity tracking.',
-  keywords: 'dashboard, Next.js, Shadcn UI, team management, productivity tracking, analytics, project management, collaboration',
+  description:
+    'Sophisticated dashboard built with Next.js 14 and Shadcn UI components for efficient team management and productivity tracking.',
+  keywords:
+    'dashboard, Next.js, Shadcn UI, team management, productivity tracking, analytics, project management, collaboration',
   openGraph: {
     type: 'website',
     url: 'https://teampulse18.netlify.app/',
     title: 'TeamPulse - Advanced Next.js Dashboard Solution',
-    description: 'Empower your team with TeamPulse, a cutting-edge dashboard built on Next.js 14 and Shadcn UI. Track productivity, manage projects, and boost collaboration.',
+    description:
+      'Empower your team with TeamPulse, a cutting-edge dashboard built on Next.js 14 and Shadcn UI. Track productivity, manage projects, and boost collaboration.',
     siteName: 'TeamPulse',
     images: [
       {
@@ -59,7 +63,8 @@ export const metadata: Metadata = {
     }
   },
   applicationName: 'TeamPulse',
-  category: 'Business, Productivity, Team Management, Analytics, Next.js Dashboard, Next.js Starter Template, Next-TS-Shadcn'
+  category:
+    'Business, Productivity, Team Management, Analytics, Next.js Dashboard, Next.js Starter Template, Next-TS-Shadcn'
 };
 
 export default async function RootLayout({
