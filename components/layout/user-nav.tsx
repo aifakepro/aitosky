@@ -43,7 +43,17 @@ export function UserNav() {
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/profile">Profile</Link>
+              <Link
+                href="/dashboard/profile"
+                className="flex w-full items-center justify-between"
+              >
+                Profile
+                <img
+                  src="/32.png"
+                  alt="Profile icon"
+                  className="ml-2 h-4 w-4"
+                />
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               Billing
