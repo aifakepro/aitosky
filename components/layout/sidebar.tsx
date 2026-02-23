@@ -43,12 +43,11 @@ export default function Sidebar({ className }: SidebarProps) {
       )}
     >
       <div className="hidden p-5 pt-10 lg:block">
-        <Link
-          href={'/dashboard'}
-          className='flex flex-row'
-        >
+        <Link href={'/dashboard'} className="flex flex-row">
           <Icons.logo />
-          {isMinimized ? null : (<span className='ml-2 antialiased font-semibold'>TeamPulse</span>)}
+          {isMinimized ? null : (
+            <span className="ml-2 font-semibold antialiased">AIcanBUY</span>
+          )}
         </Link>
       </div>
       <ChevronLeft

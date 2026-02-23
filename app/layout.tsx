@@ -11,7 +11,7 @@ import { auth } from '@/auth';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://teampulse18.netlify.app/'),
+  metadataBase: new URL('https://aitosky.vercel.app/'),
   title: 'TeamPulse - Next.js/Shadcn Dashboard',
   description:
     'Sophisticated dashboard built with Next.js 14 and Shadcn UI components for efficient team management and productivity tracking.',
@@ -19,14 +19,14 @@ export const metadata: Metadata = {
     'dashboard, Next.js, Shadcn UI, team management, productivity tracking, analytics, project management, collaboration',
   openGraph: {
     type: 'website',
-    url: 'https://teampulse18.netlify.app/',
+    url: 'https://aitosky.vercel.app/',
     title: 'TeamPulse - Advanced Next.js Dashboard Solution',
     description:
       'Empower your team with TeamPulse, a cutting-edge dashboard built on Next.js 14 and Shadcn UI. Track productivity, manage projects, and boost collaboration.',
     siteName: 'TeamPulse',
     images: [
       {
-        url: 'https://teampulse18.netlify.app/opengraph-image.png',
+        url: 'https://aitosky.vercel.app/opengraph-image.png',
         width: 1200,
         height: 630,
         alt: 'TeamPulse Dashboard Preview'
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'TeamPulse - Advanced Next.js Dashboard Solution',
     description: `Elevate your team's performance with TeamPulse, featuring state- of - the - art analytics and project management tools.`,
-    images: ['https://teampulse18.netlify.app/opengraph-image.png']
+    images: ['https://aitosky.vercel.app/opengraph-image.png']
   },
   icons: {
     icon: '/favicon.ico',
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
       'en-US': '/en-US',
       'es-ES': '/es-ES'
     },
-    canonical: 'https://teampulse18.netlify.app/'
+    canonical: 'https://aitosky.vercel.app/'
   },
   authors: [{ name: 'Manjunath R' }],
   robots: {
