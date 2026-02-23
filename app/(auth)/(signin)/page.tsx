@@ -37,8 +37,8 @@ export default function AuthenticationPage() {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;IF YOU ARE HUNGRY - THINK ABOUT FOOD, IF YOU WANT TO BE
-              RICH - THINK ABOUT MONEY.&rdquo;
+              F YOU ARE HUNGRY - THINK ABOUT FOOD, IF YOU WANT TO BE RICH -
+              THINK ABOUT MONEY.
             </p>
             <footer className="text-sm text-foreground"></footer>
           </blockquote>
