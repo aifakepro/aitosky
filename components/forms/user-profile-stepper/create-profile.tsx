@@ -215,8 +215,7 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
           // Add other field names as needed
         ])
         .flat()
-    },
-    { id: 'Step 3', name: 'Complete' }
+    }
   ];
 
   const next = async () => {
@@ -229,7 +228,7 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
     if (!output) return;
 
     if (currentStep < steps.length - 1) {
-      if (currentStep === steps.length - 2) {
+      if (currentStep === steps.length - 1) {
         await form.handleSubmit(processForm)();
       }
       setPreviousStep(currentStep);
