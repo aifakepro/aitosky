@@ -29,7 +29,7 @@ import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangleIcon, Trash, Trash2Icon } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 interface ProfileFormType {
@@ -85,6 +85,49 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
     control,
     name: 'jobs'
   });
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const res = await fetch('/api/user/profile');
+        if (!res.ok) return;
+        const profile = await res.json();
+        if (!profile) return;
+
+        form.reset({
+          firstname: profile.firstname ?? '',
+          lastname: profile.lastname ?? '',
+          email: profile.email ?? '',
+          contactno: profile.contactno ? Number(profile.contactno) : 0,
+          country: profile.country ?? '',
+          city: profile.city ?? '',
+          jobs: profile.jobs?.length
+            ? profile.jobs.map((j: any) => ({
+                jobtitle: j.jobtitle,
+                employer: j.employer,
+                startdate: j.startdate,
+                enddate: j.enddate,
+                jobcountry: j.jobcountry,
+                jobcity: j.jobcity
+              }))
+            : [
+                {
+                  jobtitle: '',
+                  employer: '',
+                  startdate: '',
+                  enddate: '',
+                  jobcountry: '',
+                  jobcity: ''
+                }
+              ]
+        });
+      } catch (e) {
+        console.error('Failed to load profile', e);
+      }
+    };
+
+    loadProfile();
+  }, []);
 
   const onSubmit = async (data: ProfileFormValues) => {
     try {
