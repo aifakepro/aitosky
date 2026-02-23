@@ -481,7 +481,7 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
                             />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="max-h-60 overflow-y-auto">
                           {/* @ts-ignore  */}
                           {countries.map((country) => (
                             <SelectItem key={country.id} value={country.id}>
@@ -639,7 +639,7 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
                                       />
                                     </SelectTrigger>
                                   </FormControl>
-                                  <SelectContent>
+                                  <SelectContent className="max-h-60 overflow-y-auto">
                                     {countries.map((country) => (
                                       <SelectItem
                                         key={country.id}
