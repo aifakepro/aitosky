@@ -22,18 +22,19 @@ export default function AuthenticationPage() {
       >
         Login
       </Link>
-      <div className="relative hidden h-full flex-col bg-muted p-10 text-foreground lg:flex dark:border-r">
+      <div className="relative hidden h-full flex-col bg-muted p-10 text-foreground dark:border-r lg:flex">
         <div className="absolute inset-0 bg-gradient-to-tr from-[#396afc] via-[#c128d0] to-[#fa903f] dark:from-[#312ecb] dark:via-[#c128d0] dark:to-[#ff5e62]" />
         <div className="relative z-20 flex items-center text-lg font-medium">
-          <Icons.logo className='mr-2' />
-          TeamPulse
+          <Icons.logo className="mr-2" />
+          AIcanBUY
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;The way your employees feel is the way your customers will feel. And if your employees don&apos;t feel valued, neither will your customers.&rdquo;
+              &ldquo;IF YOU ARE HUNGRY - THINK ABOUT FOOD, IF YOU WANT TO BE
+              RICH - THINK ABOUT MONEY.&rdquo;
             </p>
-            <footer className="text-sm text-foreground">-Sybil F. Stershic</footer>
+            <footer className="text-sm text-foreground"></footer>
           </blockquote>
         </div>
       </div>
