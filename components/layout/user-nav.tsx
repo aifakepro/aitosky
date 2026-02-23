@@ -49,7 +49,7 @@ export function UserNav() {
               >
                 Profile
                 <img
-                  src="/32.png"
+                  src="/F32.png"
                   alt="Profile icon"
                   className="ml-2 h-4 w-4"
                 />
