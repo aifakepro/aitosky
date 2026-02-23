@@ -685,7 +685,7 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
                     disabled={loading}
                     onClick={form.handleSubmit(processForm)}
                   >
-                    {loading ? 'Saving...' : 'Сохранить'}
+                    {loading ? 'Saving...' : 'Save'}
                   </Button>
                 </div>
               </>
