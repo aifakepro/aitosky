@@ -629,20 +629,11 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
                 <div className="mt-4 flex justify-center">
                   <Button
                     type="button"
-                    className="flex justify-center"
-                    size={'lg'}
-                    onClick={() =>
-                      append({
-                        jobtitle: '',
-                        employer: '',
-                        startdate: '',
-                        enddate: '',
-                        jobcountry: '',
-                        jobcity: ''
-                      })
-                    }
+                    size="lg"
+                    disabled={loading}
+                    onClick={form.handleSubmit(processForm)}
                   >
-                    Add More
+                    {loading ? 'Saving...' : 'Сохранить'}
                   </Button>
                 </div>
               </>
