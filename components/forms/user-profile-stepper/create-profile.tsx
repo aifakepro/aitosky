@@ -243,7 +243,89 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
     }
   };
 
-  const countries = [{ id: 'wow', name: 'india' }];
+  const countries = [
+    { id: 'af', name: 'Afghanistan' },
+    { id: 'al', name: 'Albania' },
+    { id: 'dz', name: 'Algeria' },
+    { id: 'ar', name: 'Argentina' },
+    { id: 'am', name: 'Armenia' },
+    { id: 'au', name: 'Australia' },
+    { id: 'at', name: 'Austria' },
+    { id: 'az', name: 'Azerbaijan' },
+    { id: 'bh', name: 'Bahrain' },
+    { id: 'bd', name: 'Bangladesh' },
+    { id: 'by', name: 'Belarus' },
+    { id: 'be', name: 'Belgium' },
+    { id: 'br', name: 'Brazil' },
+    { id: 'bg', name: 'Bulgaria' },
+    { id: 'ca', name: 'Canada' },
+    { id: 'cl', name: 'Chile' },
+    { id: 'cn', name: 'China' },
+    { id: 'co', name: 'Colombia' },
+    { id: 'hr', name: 'Croatia' },
+    { id: 'cz', name: 'Czech Republic' },
+    { id: 'dk', name: 'Denmark' },
+    { id: 'eg', name: 'Egypt' },
+    { id: 'ee', name: 'Estonia' },
+    { id: 'fi', name: 'Finland' },
+    { id: 'fr', name: 'France' },
+    { id: 'ge', name: 'Georgia' },
+    { id: 'de', name: 'Germany' },
+    { id: 'gr', name: 'Greece' },
+    { id: 'hu', name: 'Hungary' },
+    { id: 'in', name: 'India' },
+    { id: 'id', name: 'Indonesia' },
+    { id: 'iq', name: 'Iraq' },
+    { id: 'ir', name: 'Iran' },
+    { id: 'ie', name: 'Ireland' },
+    { id: 'il', name: 'Israel' },
+    { id: 'it', name: 'Italy' },
+    { id: 'jp', name: 'Japan' },
+    { id: 'jo', name: 'Jordan' },
+    { id: 'kz', name: 'Kazakhstan' },
+    { id: 'ke', name: 'Kenya' },
+    { id: 'kw', name: 'Kuwait' },
+    { id: 'kg', name: 'Kyrgyzstan' },
+    { id: 'lv', name: 'Latvia' },
+    { id: 'lt', name: 'Lithuania' },
+    { id: 'lu', name: 'Luxembourg' },
+    { id: 'my', name: 'Malaysia' },
+    { id: 'mx', name: 'Mexico' },
+    { id: 'md', name: 'Moldova' },
+    { id: 'mn', name: 'Mongolia' },
+    { id: 'ma', name: 'Morocco' },
+    { id: 'nl', name: 'Netherlands' },
+    { id: 'nz', name: 'New Zealand' },
+    { id: 'ng', name: 'Nigeria' },
+    { id: 'no', name: 'Norway' },
+    { id: 'pk', name: 'Pakistan' },
+    { id: 'ph', name: 'Philippines' },
+    { id: 'pl', name: 'Poland' },
+    { id: 'pt', name: 'Portugal' },
+    { id: 'qa', name: 'Qatar' },
+    { id: 'ro', name: 'Romania' },
+    { id: 'ru', name: 'Russia' },
+    { id: 'sa', name: 'Saudi Arabia' },
+    { id: 'rs', name: 'Serbia' },
+    { id: 'sg', name: 'Singapore' },
+    { id: 'sk', name: 'Slovakia' },
+    { id: 'za', name: 'South Africa' },
+    { id: 'kr', name: 'South Korea' },
+    { id: 'es', name: 'Spain' },
+    { id: 'se', name: 'Sweden' },
+    { id: 'ch', name: 'Switzerland' },
+    { id: 'tw', name: 'Taiwan' },
+    { id: 'tj', name: 'Tajikistan' },
+    { id: 'th', name: 'Thailand' },
+    { id: 'tr', name: 'Turkey' },
+    { id: 'tm', name: 'Turkmenistan' },
+    { id: 'ua', name: 'Ukraine' },
+    { id: 'ae', name: 'United Arab Emirates' },
+    { id: 'gb', name: 'United Kingdom' },
+    { id: 'us', name: 'United States' },
+    { id: 'uz', name: 'Uzbekistan' },
+    { id: 'vn', name: 'Vietnam' }
+  ];
   const cities = [{ id: '2', name: 'Karnataka' }];
 
   return (
@@ -418,29 +500,13 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>City</FormLabel>
-                      <Select
-                        disabled={loading}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue
-                              defaultValue={field.value}
-                              placeholder="Select a city"
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {/* @ts-ignore  */}
-                          {cities.map((city) => (
-                            <SelectItem key={city.id} value={city.id}>
-                              {city.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input
+                          disabled={loading}
+                          placeholder="Enter your city"
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -594,28 +660,14 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Job city</FormLabel>
-                                <Select
-                                  disabled={loading}
-                                  onValueChange={field.onChange}
-                                  value={field.value}
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue
-                                        defaultValue={field.value}
-                                        placeholder="Select your job city"
-                                      />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {cities.map((city) => (
-                                      <SelectItem key={city.id} value={city.id}>
-                                        {city.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <FormControl>
+                                  <Input
+                                    type="text"
+                                    disabled={loading}
+                                    placeholder="Enter city"
+                                    {...field}
+                                  />
+                                </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
