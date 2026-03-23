@@ -131,12 +131,13 @@ export function BarGraph({ data = chartData }: { data?: typeof chartData }) {
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof chartConfig>('desktop');
 
+  // ✅ рахує з даних юзера
   const total = React.useMemo(
     () => ({
-      desktop: chartData.reduce((acc, curr) => acc + curr.desktop, 0),
-      mobile: chartData.reduce((acc, curr) => acc + curr.mobile, 0)
+      desktop: data.reduce((acc, curr) => acc + curr.desktop, 0),
+      mobile: data.reduce((acc, curr) => acc + curr.mobile, 0)
     }),
-    []
+    [data]
   );
 
   return (
