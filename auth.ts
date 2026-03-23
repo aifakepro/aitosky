@@ -8,6 +8,7 @@ export const { auth, handlers, signOut, signIn } = NextAuth({
   session: { strategy: 'jwt' },
   ...authConfig,
   events: {
+    // ПЕРЕМЕСТИТЕ EVENTS СЮДА - они работают в Node.js runtime
     async signIn({ user }) {
       if (user?.id) {
         await prisma.user.update({
