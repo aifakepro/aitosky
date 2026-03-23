@@ -7,7 +7,7 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-const data = [
+const chartData = [
   { date: '2024-04-01', desktop: 222, mobile: 150 },
   { date: '2024-04-02', desktop: 97, mobile: 180 },
   { date: '2024-04-03', desktop: 167, mobile: 120 },
@@ -31,20 +31,51 @@ const data = [
 ];
 
 async function main() {
-  const users = await prisma.user.findMany({ select: { id: true } });
+  // 1. Отримуємо всіх юзерів
+  const users = await prisma.user.findMany({
+    select: { id: true, email: true }
+  });
+
   if (!users.length) {
-    console.log('Немає юзерів в базі');
+    console.log('❌ Немає юзерів в базі. Спочатку створи хоча б одного.');
     return;
   }
 
-  const seededData = users.flatMap((user) =>
-    data.map((row) => ({ ...row, userId: user.id }))
-  );
+  console.log(`✅ Знайдено ${users.length} юзер(ів):`);
+  users.forEach((u) => console.log(`   - ${u.id} (${u.email ?? 'no email'})`));
 
-  await prisma.dashboardBarChart.createMany({ data: seededData });
-  console.log(`Seed done! ${seededData.length} rows inserted.`);
+  // 2. Для кожного юзера окремо — щоб уникнути дублів
+  let totalInserted = 0;
+
+  for (const user of users) {
+    // Перевіряємо, чи вже є дані для цього юзера
+    const existing = await prisma.dashboardBarChart.count({
+      where: { userId: user.id }
+    });
+
+    if (existing > 0) {
+      console.log(
+        `⏭️  Юзер ${user.id} вже має ${existing} рядків — пропускаємо.`
+      );
+      continue;
+    }
+
+    const rows = chartData.map((row) => ({ ...row, userId: user.id }));
+
+    await prisma.dashboardBarChart.createMany({ data: rows });
+
+    console.log(`✅ Юзер ${user.id}: вставлено ${rows.length} рядків.`);
+    totalInserted += rows.length;
+  }
+
+  console.log(
+    `\n🎉 Seed завершено! Всього вставлено: ${totalInserted} рядків.`
+  );
 }
 
 main()
-  .catch(console.error)
+  .catch((err) => {
+    console.error('❌ Помилка під час seed:', err);
+    process.exit(1);
+  })
   .finally(() => prisma.$disconnect());
