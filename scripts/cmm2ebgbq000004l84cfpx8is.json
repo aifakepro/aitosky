@@ -1,0 +1,22 @@
+[
+  { "date": "2024-04-01", "desktop": 312, "mobile": 198 },
+  { "date": "2024-04-05", "desktop": 145, "mobile": 267 },
+  { "date": "2024-04-12", "desktop": 423, "mobile": 134 },
+  { "date": "2024-04-18", "desktop": 89, "mobile": 312 },
+  { "date": "2024-04-24", "desktop": 267, "mobile": 189 },
+  { "date": "2025-05-03", "desktop": 378, "mobile": 445 },
+  { "date": "2024-05-09", "desktop": 234, "mobile": 167 },
+  { "date": "2024-05-15", "desktop": 491, "mobile": 298 },
+  { "date": "2024-05-21", "desktop": 156, "mobile": 423 },
+  { "date": "2024-05-27", "desktop": 345, "mobile": 212 },
+  { "date": "2024-06-02", "desktop": 278, "mobile": 389 },
+  { "date": "2024-06-08", "desktop": 467, "mobile": 145 },
+  { "date": "2024-06-14", "desktop": 123, "mobile": 334 },
+  { "date": "2024-06-20", "desktop": 389, "mobile": 278 },
+  { "date": "2024-06-26", "desktop": 212, "mobile": 456 },
+  { "date": "2024-07-02", "desktop": 334, "mobile": 167 },
+  { "date": "2024-07-08", "desktop": 445, "mobile": 289 },
+  { "date": "2024-07-14", "desktop": 178, "mobile": 412 },
+  { "date": "2024-07-20", "desktop": 356, "mobile": 234 },
+  { "date": "2024-07-26", "desktop": 289, "mobile": 367 }
+]
