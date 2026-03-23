@@ -31,8 +31,18 @@ const data = [
 ];
 
 async function main() {
-  await prisma.dashboardBarChart.createMany({ data });
-  console.log('Seed done!');
+  const users = await prisma.user.findMany({ select: { id: true } });
+  if (!users.length) {
+    console.log('Немає юзерів в базі');
+    return;
+  }
+
+  const seededData = users.flatMap((user) =>
+    data.map((row) => ({ ...row, userId: user.id }))
+  );
+
+  await prisma.dashboardBarChart.createMany({ data: seededData });
+  console.log(`Seed done! ${seededData.length} rows inserted.`);
 }
 
 main()
