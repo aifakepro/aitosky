@@ -5,7 +5,8 @@ import { CalendarDateRangePicker } from '@/components/date-range-picker';
 import PageContainer from '@/components/layout/page-container';
 import { RecentSales } from '@/components/recent-sales';
 import { Button } from '@/components/ui/button';
-import { db } from '@/lib/db';
+import { auth } from '@/auth';
+import { prisma } from '@/lib/prisma';
 import {
   Card,
   CardContent,
@@ -16,7 +17,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default async function page() {
-  const barData = await db.dashboardBarChart.findMany({
+  const session = await auth();
+  const barData = await prisma.dashboardBarChart.findMany({
+    where: { userId: session?.user?.id },
     orderBy: { date: 'asc' }
   });
   return (
