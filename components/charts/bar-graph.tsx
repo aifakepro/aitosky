@@ -127,7 +127,7 @@ const chartConfig = {
   }
 } satisfies ChartConfig;
 
-export function BarGraph() {
+export function BarGraph({ data = chartData }: { data?: typeof chartData }) {
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof chartConfig>('desktop');
 
@@ -176,7 +176,7 @@ export function BarGraph() {
         >
           <BarChart
             accessibilityLayer
-            data={chartData}
+            data={data}
             margin={{
               left: 12,
               right: 12

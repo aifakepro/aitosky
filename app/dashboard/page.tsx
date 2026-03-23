@@ -5,6 +5,7 @@ import { CalendarDateRangePicker } from '@/components/date-range-picker';
 import PageContainer from '@/components/layout/page-container';
 import { RecentSales } from '@/components/recent-sales';
 import { Button } from '@/components/ui/button';
+import { db } from '@/lib/db';
 import {
   Card,
   CardContent,
@@ -14,7 +15,10 @@ import {
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-export default function page() {
+export default async function page() {
+  const barData = await db.dashboardBarChart.findMany({
+    orderBy: { date: 'asc' }
+  });
   return (
     <PageContainer scrollable={true}>
       <div className="space-y-2">
@@ -140,7 +144,7 @@ export default function page() {
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
               <div className="col-span-4">
-                <BarGraph />
+                <BarGraph data={barData} />
               </div>
               <Card className="col-span-4 md:col-span-3">
                 <CardHeader>
