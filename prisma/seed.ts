@@ -11,7 +11,7 @@ const prisma = new PrismaClient({ adapter });
 
 // 🔥 Читає JSON по userId
 async function getUserData(userId: string) {
-  const filePath = path.join(process.cwd(), 'data', `${userId}.json`);
+  const filePath = path.join(process.cwd(), 'uploads-data', `${userId}.json`);
 
   try {
     const file = await fs.readFile(filePath, 'utf-8');
