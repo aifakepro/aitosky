@@ -21,8 +21,8 @@ export const { auth, handlers, signOut, signIn } = NextAuth({
             d.setDate(today.getDate() + i);
             return {
               date: d.toISOString().split('T')[0],
-              desktop: 10, // СУВОРО 100
-              mobile: 10, // СУВОРО 100
+              desktop: 0.25, // СУВОРО 100
+              mobile: 0.25, // СУВОРО 100
               userId: userId
             };
           });
