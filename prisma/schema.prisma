@@ -32,6 +32,7 @@ model User {
   sessions Session[]
   assets   UserAsset[]
   jobs     UserJob[]   // ← НОВАЯ связь
+  dashboardBarChart DashboardBarChart[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -125,4 +126,6 @@ model DashboardBarChart {
   date    String
   desktop Int
   mobile  Int
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
