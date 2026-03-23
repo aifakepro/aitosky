@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Git Add",
+      "type": "shell",
+      "command": "git add ."
+    },
+    {
+      "label": "Git Commit",
+      "type": "shell",
+      "command": "git commit -m \"update\""
+    },
+    {
+      "label": "Git Push",
+      "type": "shell",
+      "command": "git push"
+    },
+    {
+      "label": "Deploy GitHub",
+      "dependsOn": ["Git Add", "Git Commit", "Git Push"],
+      "dependsOrder": "sequence"
+    }
+  ]
+}
