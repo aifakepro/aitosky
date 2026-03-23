@@ -9,15 +9,14 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-// Читаємо JSON з папки uploads-data
+// Читає JSON по userId з uploads-data
 async function getUserData(userId: string) {
   const filePath = path.join(process.cwd(), 'uploads-data', `${userId}.json`);
-
   try {
     const file = await fs.readFile(filePath, 'utf-8');
     const data = JSON.parse(file);
 
-    // Просто додаємо userId, не чіпаємо інші поля
+    // Просто додаємо userId, не змінюємо інші поля
     return data.map((item: any) => ({
       ...item,
       userId
@@ -41,12 +40,15 @@ async function main() {
   console.log(`✅ Знайдено ${users.length} юзер(ів)`);
 
   for (const user of users) {
+    // Видаляємо старі дані
     const deleted = await prisma.dashboardBarChart.deleteMany({
       where: { userId: user.id }
     });
 
+    // Беремо дані з JSON
     const rows = await getUserData(user.id);
 
+    // Вставка тільки якщо дані є
     if (rows.length) {
       await prisma.dashboardBarChart.createMany({ data: rows });
     }
