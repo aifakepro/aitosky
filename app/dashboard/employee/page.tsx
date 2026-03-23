@@ -28,7 +28,7 @@ export default async function page({ searchParams }: paramsProps) {
   const offset = (page - 1) * pageLimit;
 
   const res = await fetch(
-    `https://api.slingacademy.com/v1/sample-data/users?offset=${offset}&limit=${pageLimit}` +
+    `https://dummyjson.com/users?limit=${pageLimit}&skip=${offset}` +
       (country ? `&search=${country}` : '')
   );
   const employeeRes = await res.json();
