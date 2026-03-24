@@ -76,7 +76,7 @@ export function AreaGraph() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-fit md:h-[300px]">
+        <div className="h-[200px] md:h-[300px]">
           <ChartContainer config={chartConfig}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
