@@ -196,7 +196,7 @@ export function EmployeeTable<TData, TValue>({
         }
         className="w-full md:max-w-sm"
       />
-      <div className="overflow-auto rounded-md border">
+      <ScrollArea className="h-[calc(80vh-220px)] rounded-md border">
         <Table className="relative">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -246,7 +246,7 @@ export function EmployeeTable<TData, TValue>({
           </TableBody>
         </Table>
         <ScrollBar orientation="horizontal" />
-      </div>
+      </ScrollArea>
 
       <div className="flex flex-col items-center justify-end gap-2 space-x-2 py-4 sm:flex-row">
         <div className="flex w-full items-center justify-between">
