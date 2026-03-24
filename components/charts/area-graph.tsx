@@ -66,7 +66,7 @@ export function AreaGraph({ data = defaultChartData }: AreaGraphProps) {
             accessibilityLayer
             data={data}
             margin={{
-              top: 0,
+              top: 12,
               left: 12,
               right: 12,
               bottom: 0
