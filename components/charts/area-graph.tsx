@@ -18,36 +18,33 @@ import {
   ChartTooltipContent
 } from '@/components/ui/chart';
 
-export const description = 'An area chart with gradient fill';
-
-const chartData = [
-  { month: 'Jan', desktop: 186, mobile: 80 },
-  { month: 'Feb', desktop: 305, mobile: 200 },
-  { month: 'Mar', desktop: 237, mobile: 120 },
-  { month: 'Apr', desktop: 73, mobile: 190 },
-  { month: 'May', desktop: 209, mobile: 130 },
-  { month: 'Jun', desktop: 214, mobile: 140 }
-];
+// Описываем тип данных, которые придут извне
+interface AreaGraphProps {
+  data: {
+    month: string;
+    desktop: number;
+    mobile: number;
+  }[];
+}
 
 const chartConfig = {
   desktop: {
     label: 'Desktop',
-    color: 'hsl(252, 98%, 60%)'
+    color: 'hsl(var(--chart-1))' // Используем переменные темы для гибкости
   },
   mobile: {
     label: 'Mobile',
-    color: 'hsl(173, 90%, 59%)'
+    color: 'hsl(var(--chart-2))'
   }
 } satisfies ChartConfig;
 
-export function AreaGraph() {
+// Принимаем данные как пропс { data }
+export function AreaGraph({ data }: AreaGraphProps) {
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Area Chart - Gradient</CardTitle>
-        <CardDescription>
-          Showing total visitors for the last 6 months
-        </CardDescription>
+        <CardDescription>Showing dynamic visitors data</CardDescription>
       </CardHeader>
       <CardContent className="px-2 sm:p-6">
         <ChartContainer
@@ -56,7 +53,7 @@ export function AreaGraph() {
         >
           <AreaChart
             accessibilityLayer
-            data={chartData}
+            data={data} // Используем внешние данные здесь
             margin={{
               top: 12,
               left: 12,
@@ -66,7 +63,7 @@ export function AreaGraph() {
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="month" // Убедитесь, что в JSON поле называется month
               tickLine={false}
               axisLine={false}
               tickMargin={8}
@@ -123,9 +120,8 @@ export function AreaGraph() {
       </CardContent>
       <CardFooter className="flex flex-col items-start pt-4">
         <div className="flex items-center gap-2 text-sm font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Updated in real-time <TrendingUp className="h-4 w-4" />
         </div>
-        <div className="text-sm text-muted-foreground">January - June 2024</div>
       </CardFooter>
     </Card>
   );
