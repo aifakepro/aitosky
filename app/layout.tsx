@@ -77,8 +77,13 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      {/* 
+        overflow-x-hidden: убирает горизонтальную тряску 
+        overflow-y-auto: разрешает скролл на мобилках (по умолчанию)
+        md:overflow-hidden: ЗАПРЕЩАЕТ скролл на ПК (от 768px и выше)
+      */}
       <body
-        className={`${inter.className} overflow-hidden `}
+        className={`${inter.className} overflow-y-auto overflow-x-hidden md:overflow-hidden`}
         suppressHydrationWarning={true}
       >
         <NextTopLoader showSpinner={false} />
