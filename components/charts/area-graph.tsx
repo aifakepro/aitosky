@@ -18,19 +18,13 @@ import {
   ChartTooltipContent
 } from '@/components/ui/chart';
 
-// Описываем тип данных, которые придут извне
-interface AreaGraphProps {
-  data: {
-    month: string;
-    desktop: number;
-    mobile: number;
-  }[];
-}
+export const description = 'An area chart with gradient fill and dynamic data';
 
+// Конфигурация цветов (используем CSS-переменные из темы)
 const chartConfig = {
   desktop: {
     label: 'Desktop',
-    color: 'hsl(var(--chart-1))' // Используем переменные темы для гибкости
+    color: 'hsl(var(--chart-1))'
   },
   mobile: {
     label: 'Mobile',
@@ -38,22 +32,39 @@ const chartConfig = {
   }
 } satisfies ChartConfig;
 
-// Принимаем данные как пропс { data }
-export function AreaGraph({ data }: AreaGraphProps) {
+// Типизация для входящих данных (JSON)
+interface AreaGraphProps {
+  data?: { month: string; desktop: number; mobile: number }[];
+}
+
+// Дефолтные данные на случай, если пропс data не передан
+const defaultChartData = [
+  { month: 'Jan', desktop: 186, mobile: 80 },
+  { month: 'Feb', desktop: 305, mobile: 200 },
+  { month: 'Mar', desktop: 237, mobile: 120 },
+  { month: 'Apr', desktop: 73, mobile: 190 },
+  { month: 'May', desktop: 209, mobile: 130 },
+  { month: 'Jun', desktop: 214, mobile: 140 }
+];
+
+export function AreaGraph({ data = defaultChartData }: AreaGraphProps) {
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Area Chart - Gradient</CardTitle>
-        <CardDescription>Showing dynamic visitors data</CardDescription>
+        <CardDescription>
+          Showing total visitors for the last 6 months
+        </CardDescription>
       </CardHeader>
       <CardContent className="px-2 sm:p-6">
+        {/* aspect-auto и h-[310px] фиксируют высоту, чтобы график не улетал вниз */}
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[310px] w-full"
         >
           <AreaChart
             accessibilityLayer
-            data={data} // Используем внешние данные здесь
+            data={data}
             margin={{
               top: 12,
               left: 12,
@@ -63,7 +74,7 @@ export function AreaGraph({ data }: AreaGraphProps) {
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month" // Убедитесь, что в JSON поле называется month
+              dataKey="month"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
@@ -120,8 +131,9 @@ export function AreaGraph({ data }: AreaGraphProps) {
       </CardContent>
       <CardFooter className="flex flex-col items-start pt-4">
         <div className="flex items-center gap-2 text-sm font-medium leading-none">
-          Updated in real-time <TrendingUp className="h-4 w-4" />
+          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
+        <div className="text-sm text-muted-foreground">January - June 2024</div>
       </CardFooter>
     </Card>
   );
