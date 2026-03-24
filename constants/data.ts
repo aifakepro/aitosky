@@ -124,7 +124,7 @@ export const navItems: (NavItem & { roles?: string[] })[] = [
     href: '/dashboard/user',
     icon: 'user',
     label: 'user',
-    roles: ['admin'] // Тільки адмін
+    roles: ['user', 'admin'] // Тільки адмін
   },
   {
     title: 'Employee',
@@ -134,11 +134,11 @@ export const navItems: (NavItem & { roles?: string[] })[] = [
     roles: ['user', 'admin'] // Тільки адмін
   },
   {
-    title: 'My Tasks', // Наприклад, ваша нова сторінка
-    href: '/dashboard/tasks',
+    title: 'My Tasks',
+    href: '/dashboard/kanban', // ← было /dashboard/tasks
     icon: 'kanban',
     label: 'tasks',
-    roles: ['user', 'admin'] // Бачать всі
+    roles: ['user', 'admin']
   },
   {
     title: 'Profile',
