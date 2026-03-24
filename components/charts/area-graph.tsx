@@ -2,7 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { TrendingUp } from 'lucide-react';
-import { Area, AreaChart, CartesianGrid, XAxis, ResponsiveContainer } from 'recharts';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  XAxis,
+  ResponsiveContainer
+} from 'recharts';
 import {
   Card,
   CardContent,
@@ -19,7 +25,8 @@ import {
 } from '@/components/ui/chart';
 import { revalidatePath } from 'next/cache';
 
-export const description = "An area chart with gradient fill and refined layout"
+export const description =
+  'An area chart with gradient fill and refined layout';
 
 const chartData = [
   { month: 'Jan', desktop: 186, mobile: 80 },
@@ -59,8 +66,7 @@ const useMediaQuery = (query: any) => {
 
 export function AreaGraph() {
   const isLargeScreen = useMediaQuery('(min-width: 1024px)');
-  useEffect(() => {
-  }, [isLargeScreen])
+  useEffect(() => {}, [isLargeScreen]);
   return (
     <Card className="w-full">
       <CardHeader>
@@ -80,7 +86,7 @@ export function AreaGraph() {
                   top: 0,
                   left: 12,
                   right: 12,
-                  bottom: isLargeScreen ? 60 : 0
+                  bottom: 0
                 }}
               >
                 <CartesianGrid vertical={false} />
@@ -91,7 +97,10 @@ export function AreaGraph() {
                   tickMargin={8}
                   tickFormatter={(value) => value.slice(0, 3)}
                 />
-                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent />}
+                />
                 <defs>
                   <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
                     <stop
@@ -143,9 +152,7 @@ export function AreaGraph() {
         <div className="flex items-center gap-2 text-sm font-medium">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
-        <div className="text-sm text-muted-foreground">
-          January - June 2024
-        </div>
+        <div className="text-sm text-muted-foreground">January - June 2024</div>
       </CardFooter>
     </Card>
   );
