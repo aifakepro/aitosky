@@ -86,7 +86,7 @@ export function AreaGraph() {
                   top: 0,
                   left: 12,
                   right: 12,
-                  bottom: isLargeScreen ? 60 : 0
+                  bottom: 0
                 }}
               >
                 <CartesianGrid vertical={false} />
