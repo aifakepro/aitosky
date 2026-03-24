@@ -18,27 +18,9 @@ import {
   ChartTooltipContent
 } from '@/components/ui/chart';
 
-export const description = 'An area chart with gradient fill and dynamic data';
+export const description = 'An area chart with gradient fill';
 
-// Конфигурация цветов (используем CSS-переменные из темы)
-const chartConfig = {
-  desktop: {
-    label: 'Desktop',
-    color: 'hsl(var(--chart-1))'
-  },
-  mobile: {
-    label: 'Mobile',
-    color: 'hsl(var(--chart-2))'
-  }
-} satisfies ChartConfig;
-
-// Типизация для входящих данных (JSON)
-interface AreaGraphProps {
-  data?: { month: string; desktop: number; mobile: number }[];
-}
-
-// Дефолтные данные на случай, если пропс data не передан
-const defaultChartData = [
+const chartData = [
   { month: 'Jan', desktop: 186, mobile: 80 },
   { month: 'Feb', desktop: 305, mobile: 200 },
   { month: 'Mar', desktop: 237, mobile: 120 },
@@ -47,7 +29,18 @@ const defaultChartData = [
   { month: 'Jun', desktop: 214, mobile: 140 }
 ];
 
-export function AreaGraph({ data = defaultChartData }: AreaGraphProps) {
+const chartConfig = {
+  desktop: {
+    label: 'Desktop',
+    color: 'hsl(252, 98%, 60%)'
+  },
+  mobile: {
+    label: 'Mobile',
+    color: 'hsl(173, 90%, 59%)'
+  }
+} satisfies ChartConfig;
+
+export function AreaGraph() {
   return (
     <Card className="w-full">
       <CardHeader>
@@ -57,14 +50,13 @@ export function AreaGraph({ data = defaultChartData }: AreaGraphProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="px-2 sm:p-6">
-        {/* aspect-auto и h-[310px] фиксируют высоту, чтобы график не улетал вниз */}
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[310px] w-full"
         >
           <AreaChart
             accessibilityLayer
-            data={data}
+            data={chartData}
             margin={{
               top: 12,
               left: 12,
