@@ -36,7 +36,7 @@ export default async function page({ searchParams }: paramsProps) {
   const pageCount = Math.ceil(totalUsers / pageLimit);
   const employee: Employee[] = employeeRes.users;
   return (
-    <PageContainer scrollable>
+    <PageContainer>
       <div className="space-y-4">
         <Breadcrumbs items={breadcrumbItems} />
 
