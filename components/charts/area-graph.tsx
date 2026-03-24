@@ -60,7 +60,7 @@ export function AreaGraph({ data = defaultChartData }: AreaGraphProps) {
         {/* aspect-auto и h-[310px] фиксируют высоту, чтобы график не улетал вниз */}
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[310px] w-full"
+          className="aspect-auto h-[320px] w-full"
         >
           <AreaChart
             accessibilityLayer
