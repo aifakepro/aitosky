@@ -50,13 +50,13 @@ const defaultChartData = [
 export function AreaGraph({ data = defaultChartData }: AreaGraphProps) {
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="pb-0">
         <CardTitle>Area Chart - Gradient</CardTitle>
         <CardDescription>
           Showing total visitors for the last 6 months
         </CardDescription>
       </CardHeader>
-      <CardContent className="px-2 sm:p-6">
+      <CardContent className="px-2 pt-0 sm:p-6 sm:pt-0">
         {/* aspect-auto и h-[310px] фиксируют высоту, чтобы график не улетал вниз */}
         <ChartContainer
           config={chartConfig}
@@ -66,7 +66,7 @@ export function AreaGraph({ data = defaultChartData }: AreaGraphProps) {
             accessibilityLayer
             data={data}
             margin={{
-              top: 12,
+              top: 0,
               left: 12,
               right: 12,
               bottom: 0
