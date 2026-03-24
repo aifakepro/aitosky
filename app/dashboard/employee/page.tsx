@@ -9,7 +9,6 @@ import { Employee } from '@/constants/data';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 const breadcrumbItems = [
   { title: 'Dashboard', link: '/dashboard' },
@@ -37,38 +36,34 @@ export default async function page({ searchParams }: paramsProps) {
   const pageCount = Math.ceil(totalUsers / pageLimit);
   const employee: Employee[] = employeeRes.users;
   return (
-    <ScrollArea className="h-full">
-      {' '}
-      {/* ← добавил */}
-      <PageContainer>
-        <div className="space-y-4">
-          <Breadcrumbs items={breadcrumbItems} />
+    <PageContainer scrollable>
+      <div className="space-y-4">
+        <Breadcrumbs items={breadcrumbItems} />
 
-          <div className="flex items-start justify-between">
-            <Heading
-              title={`Employee (${totalUsers})`}
-              description="Manage employees (Server side table functionalities.)"
-            />
-
-            <Link
-              href={'/dashboard/employee/new'}
-              className={cn(buttonVariants({ variant: 'default' }))}
-            >
-              <Plus className="mr-2 h-4 w-4" /> Add New
-            </Link>
-          </div>
-          <Separator />
-
-          <EmployeeTable
-            searchKey="country"
-            pageNo={page}
-            columns={columns}
-            totalUsers={totalUsers}
-            data={employee}
-            pageCount={pageCount}
+        <div className="flex items-start justify-between">
+          <Heading
+            title={`Employee (${totalUsers})`}
+            description="Manage employees (Server side table functionalities.)"
           />
+
+          <Link
+            href={'/dashboard/employee/new'}
+            className={cn(buttonVariants({ variant: 'default' }))}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add New
+          </Link>
         </div>
-      </PageContainer>
-    </ScrollArea>
+        <Separator />
+
+        <EmployeeTable
+          searchKey="country"
+          pageNo={page}
+          columns={columns}
+          totalUsers={totalUsers}
+          data={employee}
+          pageCount={pageCount}
+        />
+      </div>
+    </PageContainer>
   );
 }
