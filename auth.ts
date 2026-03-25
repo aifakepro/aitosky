@@ -13,8 +13,9 @@ export const { auth, handlers, signOut, signIn } = NextAuth({
         try {
           const userId = user.id;
           const today = new Date();
+          console.log(`🚀 Начинаем создание графиков для ${userId}`);
 
-          // --- BarChart: 30 дней (Оставляем как есть, тут обычно нет проблем) ---
+          // --- BarChart: 30 дней (НЕ ТРОГАЕМ) ---
           const barData = Array.from({ length: 30 }).map((_, i) => {
             const d = new Date(today);
             d.setDate(today.getDate() + i);
@@ -26,30 +27,33 @@ export const { auth, handlers, signOut, signIn } = NextAuth({
             };
           });
           await prisma.dashboardBarChart.createMany({ data: barData });
+          console.log('✅ BarChart успешно создан');
 
-          // --- AreaChart: 6 месяцев (ИСПРАВЛЕННЫЙ БЛОК) ---
+          // --- AreaChart: 6 месяцев ---
           const areaData = Array.from({ length: 6 }).map((_, i) => {
             const d = new Date(today);
-            // ФИКС: Сначала ставим 1-е число, чтобы не перепрыгнуть через месяц
-            // если сегодня 31-е (например, 31 марта + 1 месяц = 1 мая, и апрель пролетает)
-            d.setDate(1);
+            d.setDate(1); // Фикс дублей
             d.setMonth(today.getMonth() + i);
-
-            const month = d.toISOString().slice(0, 7); // "2024-01"
-            return { month, desktop: 5, mobile: 5, userId };
+            return {
+              month: d.toISOString().slice(0, 7),
+              desktop: 5,
+              mobile: 5,
+              userId
+            };
           });
 
-          // Используем skipDuplicates: true, чтобы если вдруг месяц повторится,
-          // скрипт не падал, а просто пропускал дубликат
+          console.log('📊 Подготовка AreaData:', areaData);
+
+          // Пробуем создать
           await prisma.dashboardAreaChart.createMany({
             data: areaData,
             skipDuplicates: true
           });
 
-          console.log(`✅ Все графики созданы для: ${userId}`);
+          console.log('✅ AreaChart успешно создан');
         } catch (error) {
-          // Если будет ошибка, ты увидишь её в консоли терминала
-          console.error('❌ Ошибка при создании графиков:', error);
+          // ЕСЛИ ДАННЫЕ НЕ СОЗДАЛИСЬ, ТЕКСТ ОШИБКИ БУДЕТ ТУТ:
+          console.error('❌ КРИТИЧЕСКАЯ ОШИБКА ПРИ СОЗДАНИИ ГРАФИКОВ:', error);
         }
       }
     },
