@@ -132,12 +132,13 @@ model DashboardBarChart {
 }
 
 model DashboardAreaChart {
-  id      String @id @default(cuid())
-  month   String  // напр. "2024-01"
-  desktop Int
-  mobile  Int
-  userId  String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  month     String
+  desktop   Int
+  mobile    Int
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt // Авто-обновление времени изменения
 
   @@unique([userId, month])
 }
