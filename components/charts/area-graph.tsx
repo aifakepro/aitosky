@@ -78,7 +78,11 @@ export function AreaGraph({ data = defaultChartData }: AreaGraphProps) {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => {
+                // value приходит как "2026-03"
+                const date = new Date(value + '-01');
+                return date.toLocaleDateString('en-US', { month: 'short' }); // "Mar"
+              }}
             />
             <ChartTooltip
               cursor={false}
