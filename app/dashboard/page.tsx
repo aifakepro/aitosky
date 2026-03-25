@@ -19,16 +19,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 export default async function page() {
   const session = await auth();
 
-  const [barData, areaData] = await Promise.all([
-    prisma.dashboardBarChart.findMany({
-      where: { userId: session?.user?.id },
-      orderBy: { date: 'asc' }
-    }),
-    prisma.dashboardAreaChart.findMany({
-      where: { userId: session?.user?.id },
-      orderBy: { month: 'asc' }
-    })
-  ]);
+  const barData = await prisma.dashboardBarChart.findMany({
+    where: { userId: session?.user?.id },
+    orderBy: { date: 'asc' }
+  });
+
+  // ← только это добавляем
+  const areaDataRaw = await prisma.dashboardAreaChart.findMany({
+    where: { userId: session?.user?.id },
+    orderBy: { month: 'asc' }
+  });
+  const areaData = areaDataRaw.map(({ month, desktop, mobile }) => ({
+    month,
+    desktop,
+    mobile
+  }));
   return (
     <PageContainer scrollable={true}>
       <div className="space-y-2">
