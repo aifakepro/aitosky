@@ -29,10 +29,10 @@ export default async function page() {
     where: { userId: session?.user?.id },
     orderBy: { month: 'asc' }
   });
-  const areaData = areaDataRaw.map(({ month, desktop, mobile }) => ({
+  const areaData = areaDataRaw.map(({ month, desktop, mobile }, i) => ({
     month,
-    desktop,
-    mobile
+    desktop: (i + 1) * 50,
+    mobile: (i + 1) * 30
   }));
   return (
     <PageContainer scrollable={true}>
