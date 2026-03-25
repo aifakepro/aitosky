@@ -11,7 +11,7 @@ const authConfig: NextAuthConfig = {
     }),
     Github({
       clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRETя
+      clientSecret: process.env.GITHUB_SECRET
     })
   ],
   pages: {
