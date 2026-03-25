@@ -33,6 +33,7 @@ model User {
   assets   UserAsset[]
   jobs     UserJob[]   // ← НОВАЯ связь
   dashboardBarChart DashboardBarChart[]
+  dashboardAreaChart DashboardAreaChart[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -128,4 +129,15 @@ model DashboardBarChart {
   mobile  Int
   userId  String
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DashboardAreaChart {
+  id      String @id @default(cuid())
+  month   String  // напр. "2024-01"
+  desktop Int
+  mobile  Int
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month])
 }
