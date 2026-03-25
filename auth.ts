@@ -17,12 +17,13 @@ export const { auth, handlers, signOut, signIn } = NextAuth({
 
           // --- BarChart: 30 дней ---
           const barData = Array.from({ length: 30 }).map((_, i) => {
-            const d = new Date(today);
-            d.setDate(today.getDate() + i);
+            const d = new Date();
+            d.setDate(d.getDate() - (29 - i)); // От 29 дней назад до сегодня
+
             return {
               date: d.toISOString().split('T')[0],
-              desktop: 5,
-              mobile: 5,
+              desktop: Math.floor(Math.random() * 50) + 5,
+              mobile: Math.floor(Math.random() * 50) + 5,
               userId
             };
           });
@@ -30,10 +31,17 @@ export const { auth, handlers, signOut, signIn } = NextAuth({
 
           // --- AreaChart: 6 месяцев ---
           const areaData = Array.from({ length: 6 }).map((_, i) => {
-            const d = new Date(today);
-            d.setMonth(today.getMonth() + i);
+            const d = new Date();
+            d.setDate(1); // Избегаем проблем с 31-м числом
+            d.setMonth(d.getMonth() - (5 - i)); // Создаем данные за последние 5 месяцев + текущий
+
             const month = d.toISOString().slice(0, 7); // "2024-01"
-            return { month, desktop: 5, mobile: 5, userId };
+            return {
+              month,
+              desktop: Math.floor(Math.random() * 100) + 10, // Рандомные данные выглядят лучше
+              mobile: Math.floor(Math.random() * 100) + 10,
+              userId
+            };
           });
           await prisma.dashboardAreaChart.createMany({ data: areaData });
 
