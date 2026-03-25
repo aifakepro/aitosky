@@ -18,16 +18,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default async function page() {
   const session = await auth();
+  const userId = session?.user?.id;
+
+  // 1. Загружаем данные для обоих графиков сразу
+  // Используем select, чтобы не тянуть ID и даты, из-за которых всё падает
   const barData = await prisma.dashboardBarChart.findMany({
-    where: { userId: session?.user?.id },
+    where: { userId: userId },
     orderBy: { date: 'asc' }
   });
 
-  const userId = session?.user?.id;
-
   const areaData = await prisma.dashboardAreaChart.findMany({
     where: { userId: userId },
-    orderBy: { month: 'asc' }
+    orderBy: { month: 'asc' },
+    select: {
+      month: true,
+      desktop: true,
+      mobile: true
+    }
   });
 
   return (
@@ -169,6 +176,7 @@ export default async function page() {
                 </CardContent>
               </Card>
               <div className="col-span-4">
+                {/* Теперь тут передаются данные из базы */}
                 <AreaGraph data={areaData} />
               </div>
               <div className="col-span-4 md:col-span-3">
