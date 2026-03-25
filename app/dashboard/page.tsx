@@ -22,6 +22,14 @@ export default async function page() {
     where: { userId: session?.user?.id },
     orderBy: { date: 'asc' }
   });
+
+  const userId = session?.user?.id;
+
+  const areaData = await prisma.dashboardAreaChart.findMany({
+    where: { userId: userId },
+    orderBy: { month: 'asc' }
+  });
+
   return (
     <PageContainer scrollable={true}>
       <div className="space-y-2">
@@ -161,7 +169,7 @@ export default async function page() {
                 </CardContent>
               </Card>
               <div className="col-span-4">
-                <AreaGraph />
+                <AreaGraph data={areaData} />
               </div>
               <div className="col-span-4 md:col-span-3">
                 <PieGraph />
