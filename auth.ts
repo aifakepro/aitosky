@@ -31,9 +31,9 @@ export const { auth, handlers, signOut, signIn } = NextAuth({
           // --- AreaChart: 6 месяцев ---
           const areaData = Array.from({ length: 6 }).map((_, i) => {
             const d = new Date(today);
-            d.setMonth(today.getMonth() - (5 - i)); // от 5 месяцев назад до текущего
-            const month = d.toISOString().slice(0, 7); // "2025-10", "2025-11" ... "2026-03"
-            return { month, desktop: 5, mobile: 1, userId };
+            d.setMonth(today.getMonth() + i);
+            const month = d.toISOString().slice(0, 7); // "2024-01"
+            return { month, desktop: 5, mobile: 5, userId };
           });
           await prisma.dashboardAreaChart.createMany({ data: areaData });
 
