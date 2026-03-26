@@ -16,25 +16,26 @@ model User {
   image         String?
 
   // Auth поля (не трогаем)
-  role        String  @default("user")
-  balance     Float   @default(0)
+  role        String    @default("user")
+  balance     Float     @default(0)
   lastLoginAt DateTime?
 
   // ← НОВЫЕ поля профиля
-  firstname   String?
-  lastname    String?
-  contactno   String?
-  country     String?
-  city        String?
+  firstname String?
+  lastname  String?
+  contactno String?
+  country   String?
+  city      String?
 
   // Связи
-  accounts Account[]
-  sessions Session[]
-  assets   UserAsset[]
-  jobs     UserJob[]   // ← НОВАЯ связь
-  dashboardBarChart DashboardBarChart[]
+  accounts           Account[]
+  sessions           Session[]
+  assets             UserAsset[]
+  jobs               UserJob[] // ← НОВАЯ связь
+  dashboardBarChart  DashboardBarChart[]
   dashboardAreaChart DashboardAreaChart[]
-  dashboardPieChart DashboardPieChart[]
+  dashboardPieChart  DashboardPieChart[]
+  boards             Board[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -42,7 +43,7 @@ model User {
 
 // ← НОВАЯ таблица для опыта работы
 model UserJob {
-  id         String  @id @default(cuid())
+  id         String @id @default(cuid())
   userId     String
   jobcountry String
   jobcity    String
@@ -55,18 +56,18 @@ model UserJob {
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -93,11 +94,11 @@ model VerificationToken {
 
 // Актив (Вещь), которой торгуют (напр: "Золото", "BTC")
 model Asset {
-  id           String   @id @default(cuid())
+  id           String @id @default(cuid())
   name         String
-  symbol       String   @unique // Код, напр. GOLD, BTC
+  symbol       String @unique // Код, напр. GOLD, BTC
   currentPrice Float
-  
+
   priceHistory PriceHistory[]
   userAssets   UserAsset[]
 }
@@ -108,19 +109,19 @@ model PriceHistory {
   assetId   String
   price     Float
   createdAt DateTime @default(now())
-  
-  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
 }
 
 // Портфель пользователя (что он купил)
 model UserAsset {
-  id        String   @id @default(cuid())
-  userId    String
-  assetId   String
-  quantity  Float    // Сколько единиц купил
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  id       String @id @default(cuid())
+  userId   String
+  assetId  String
+  quantity Float // Сколько единиц купил
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
 }
 
 model DashboardBarChart {
@@ -152,4 +153,37 @@ model DashboardPieChart {
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, browser])
+}
+
+model Board {
+  id     String @id @default(cuid())
+  title  String
+  userId String
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  columns Column[]
+
+  createdAt DateTime @default(now())
+}
+
+model Column {
+  id      String @id @default(cuid())
+  title   String
+  order   Int
+  boardId String
+
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks Task[]
+}
+
+model Task {
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+  order       Int
+  columnId    String
+
+  column Column @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }

@@ -140,40 +140,63 @@ export function KanbanBoard() {
         pickedUpTaskColumn.current = null;
         return;
       }
-      if (
-        active.data.current?.type === 'Column' &&
-        over.data.current?.type === 'Column'
-      ) {
+
+      const activeData = active.data.current;
+      const overData = over.data.current;
+
+      // ====== COLUMN ======
+      if (activeData?.type === 'Column' && overData?.type === 'Column') {
         const overColumnPosition = columnsId.findIndex((id) => id === over.id);
 
-        return `Column ${
-          active.data.current.column.title
-        } was dropped into position ${overColumnPosition + 1} of ${
-          columnsId.length
-        }`;
-      } else if (
-        active.data.current?.type === 'Task' &&
-        over.data.current?.type === 'Task'
-      ) {
+        pickedUpTaskColumn.current = null;
+
+        return `Column ${activeData.column.title} was dropped into position ${
+          overColumnPosition + 1
+        } of ${columnsId.length}`;
+      }
+
+      // ====== TASK ======
+      if (activeData?.type === 'Task' && overData?.type === 'Task') {
+        const task = activeData.task;
+
         const { tasksInColumn, taskPosition, column } = getDraggingTaskData(
           over.id,
-          over.data.current.task.status
+          overData.task.status
         );
-        if (over.data.current.task.status !== pickedUpTaskColumn.current) {
+
+        // 👉 ВАЖНО: сохраняем в БД
+        fetch('/api/kanban/task', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            taskId: task.id,
+            newColumnId: overData.task.status,
+            newOrder: taskPosition // пока простой порядок
+          })
+        });
+
+        pickedUpTaskColumn.current = null;
+
+        if (overData.task.status !== pickedUpTaskColumn.current) {
           return `Task was dropped into column ${column?.title} in position ${
             taskPosition + 1
           } of ${tasksInColumn.length}`;
         }
+
         return `Task was dropped into position ${taskPosition + 1} of ${
           tasksInColumn.length
         } in column ${column?.title}`;
       }
+
       pickedUpTaskColumn.current = null;
     },
     onDragCancel({ active }) {
       pickedUpTaskColumn.current = null;
-      if (!hasDraggableData(active)) return;
-      return `Dragging ${active.data.current?.type} cancelled.`;
+      if (hasDraggableData(active) && active.data.current?.type === 'Task') {
+        return `Dragging cancelled. Task returned to its original position.`;
+      }
     }
   };
 
