@@ -76,15 +76,19 @@ export const useTaskStore = create<State & Actions>((set, get) => ({
 
   addTask: async (columnId: string, title: string, description?: string) => {
     try {
-      const order = get().tasks.filter((t) => t.columnId === columnId).length;
+      // СЧИТАЕМ ТОЛЬКО ЗАДАЧИ В КОНКРЕТНОЙ КОЛОНКЕ
+      const tasksInColumn = get().tasks.filter((t) => t.columnId === columnId);
+      const order = tasksInColumn.length;
+
       const response = await fetch('/api/kanban/task', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description, columnId, order })
       });
+
       if (response.ok) await get().fetchBoardData();
     } catch (error) {
-      console.error('Ошибка создания задачи:', error);
+      console.error(error);
     }
   },
 

@@ -250,14 +250,22 @@ export function KanbanBoard() {
 
     // ПЕРЕМЕЩЕНИЕ ЗАДАЧ (СОХРАНЕНИЕ ПОРЯДКА)
     if (activeData?.type === 'Task') {
-      const task = tasks.find((t) => t.id === activeId);
-      if (task) {
-        // Вычисляем индекс задачи среди задач ЕЁ НОВОЙ колонки
-        const tasksInNewCol = useTaskStore
-          .getState()
-          .tasks.filter((t) => t.columnId === task.columnId);
-        const newOrder = tasksInNewCol.findIndex((t) => t.id === activeId);
+      const activeId = active.id as string;
 
+      // 1. Берем актуальный плоский список задач из стора
+      const allTasks = useTaskStore.getState().tasks;
+      const task = allTasks.find((t) => t.id === activeId);
+
+      if (task) {
+        // 2. ФИЛЬТРУЕМ задачи: оставляем только те, что в ТЕКУЩЕЙ колонке задачи
+        const tasksInCurrentCol = allTasks.filter(
+          (t) => t.columnId === task.columnId
+        );
+
+        // 3. Находим позицию задачи в этой колонке
+        const newOrder = tasksInCurrentCol.findIndex((t) => t.id === activeId);
+
+        // 4. Отправляем именно этот локальный индекс на сервер
         await moveTask(activeId, task.columnId, newOrder);
       }
     }
