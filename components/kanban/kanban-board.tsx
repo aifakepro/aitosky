@@ -230,13 +230,13 @@ export function KanbanBoard() {
     const { active, over } = event;
     if (!over) return;
 
-    const activeId = active.id;
-    const overId = over.id;
+    const activeId = active.id as string;
+    const overId = over.id as string;
 
     if (!hasDraggableData(active)) return;
     const activeData = active.data.current;
 
-    // Сценарий 1: Перемещение колонок
+    // ПЕРЕМЕЩЕНИЕ КОЛОНОК
     if (activeData?.type === 'Column') {
       if (activeId !== overId) {
         const activeColumnIndex = columns.findIndex(
@@ -244,22 +244,22 @@ export function KanbanBoard() {
         );
         const overColumnIndex = columns.findIndex((col) => col.id === overId);
         setCols(arrayMove(columns, activeColumnIndex, overColumnIndex));
-        // Тут можно добавить API запрос на сохранение порядка колонок
       }
       return;
     }
 
-    // Сценарий 2: Завершение перемещения задачи (сохранение в БД)
+    // ПЕРЕМЕЩЕНИЕ ЗАДАЧ (СОХРАНЕНИЕ ПОРЯДКА)
     if (activeData?.type === 'Task') {
-      const task = activeData.task;
-      // Находим финальный индекс задачи в её текущей колонке после всех onDragOver
-      const tasksInTargetColumn = tasks.filter(
-        (t) => t.columnId === task.columnId
-      );
-      const newOrder = tasksInTargetColumn.findIndex((t) => t.id === activeId);
+      const task = tasks.find((t) => t.id === activeId);
+      if (task) {
+        // Вычисляем индекс задачи среди задач ЕЁ НОВОЙ колонки
+        const tasksInNewCol = useTaskStore
+          .getState()
+          .tasks.filter((t) => t.columnId === task.columnId);
+        const newOrder = tasksInNewCol.findIndex((t) => t.id === activeId);
 
-      // Отправляем изменения в базу данных через стор
-      await moveTask(task.id, task.columnId, newOrder);
+        await moveTask(activeId, task.columnId, newOrder);
+      }
     }
   }
 

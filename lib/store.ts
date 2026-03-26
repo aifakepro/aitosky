@@ -41,7 +41,7 @@ export type Actions = {
   addCol: (title: string) => Promise<void>;
   removeCol: (id: UniqueIdentifier) => Promise<void>;
   updateCol: (id: UniqueIdentifier, newName: string) => Promise<void>;
-  setCols: (cols: Column[]) => Promise<void>; // Изменено на Promise
+  setCols: (cols: Column[]) => void;
   dragTask: (id: string | null) => void;
 };
 
@@ -68,7 +68,7 @@ export const useTaskStore = create<State & Actions>((set, get) => ({
         });
       }
     } catch (error) {
-      console.error('Ошибка загрузки доски:', error);
+      console.error('Ошибка загрузки:', error);
     } finally {
       set({ isLoading: false });
     }
@@ -76,17 +76,13 @@ export const useTaskStore = create<State & Actions>((set, get) => ({
 
   addTask: async (columnId: string, title: string, description?: string) => {
     try {
-      // Считаем задачи именно в этой колонке для правильного order
       const order = get().tasks.filter((t) => t.columnId === columnId).length;
-
       const response = await fetch('/api/kanban/task', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description, columnId, order })
       });
-      if (response.ok) {
-        await get().fetchBoardData();
-      }
+      if (response.ok) await get().fetchBoardData();
     } catch (error) {
       console.error('Ошибка создания задачи:', error);
     }
@@ -99,18 +95,15 @@ export const useTaskStore = create<State & Actions>((set, get) => ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ taskId, newColumnId, newOrder })
       });
-      if (response.ok) {
-        await get().fetchBoardData(); // Важно: перегружаем, чтобы получить обновленные order всех задач
-      }
+      if (response.ok) await get().fetchBoardData();
     } catch (error) {
-      console.error('Ошибка перемещения задачи:', error);
+      console.error('Ошибка перемещения:', error);
     }
   },
 
   addCol: async (title: string) => {
     const { currentBoardId, columns } = get();
     if (!currentBoardId) return;
-
     try {
       const response = await fetch('/api/kanban/column', {
         method: 'POST',
@@ -118,70 +111,43 @@ export const useTaskStore = create<State & Actions>((set, get) => ({
         body: JSON.stringify({
           title,
           boardId: currentBoardId,
-          order: columns.length // Ставим в конец
+          order: columns.length
         })
       });
-      if (response.ok) {
-        await get().fetchBoardData();
-      }
+      if (response.ok) await get().fetchBoardData();
     } catch (error) {
-      console.error('Ошибка создания колонки:', error);
+      console.error('Ошибка колонки:', error);
     }
   },
 
-  // ОБНОВЛЕННАЯ ФУНКЦИЯ setCols
-  setCols: async (newCols: Column[]) => {
-    // 1. Мгновенно обновляем UI
+  setCols: (newCols: Column[]) => {
     set({ columns: newCols });
-
-    // 2. Сохраняем новый порядок каждой колонки в базу
-    try {
-      const promises = newCols.map((col, index) => {
-        return fetch('/api/kanban/column', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ columnId: col.id, order: index })
-        });
+    newCols.forEach(async (col, index) => {
+      await fetch('/api/kanban/column', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ columnId: col.id, order: index })
       });
-      await Promise.all(promises);
-    } catch (error) {
-      console.error('Ошибка сохранения порядка колонок:', error);
-    }
+    });
   },
 
   removeTask: async (id: string) => {
-    try {
-      const response = await fetch(`/api/kanban/task?taskId=${id}`, {
-        method: 'DELETE'
-      });
-      if (response.ok) await get().fetchBoardData();
-    } catch (error) {
-      console.error(error);
-    }
+    await fetch(`/api/kanban/task?taskId=${id}`, { method: 'DELETE' });
+    await get().fetchBoardData();
   },
 
   removeCol: async (id: UniqueIdentifier) => {
-    try {
-      const response = await fetch(`/api/kanban/column?columnId=${id}`, {
-        method: 'DELETE'
-      });
-      if (response.ok) await get().fetchBoardData();
-    } catch (error) {
-      console.error(error);
-    }
+    await fetch(`/api/kanban/column?columnId=${id}`, { method: 'DELETE' });
+    await get().fetchBoardData();
   },
 
   updateCol: async (id: UniqueIdentifier, newName: string) => {
-    try {
-      const response = await fetch(`/api/kanban/column`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ columnId: id, title: newName })
-      });
-      if (response.ok) await get().fetchBoardData();
-    } catch (error) {
-      console.error(error);
-    }
+    await fetch(`/api/kanban/column`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ columnId: id, title: newName })
+    });
+    await get().fetchBoardData();
   },
 
   dragTask: (id: string | null) => set({ draggedTask: id }),
