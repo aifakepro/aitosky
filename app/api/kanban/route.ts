@@ -25,16 +25,13 @@ export async function GET() {
           title: 'Main Project',
           userId: session.user.id,
           columns: {
-            create: [
-              { title: 'To Do', order: 0 },
-              { title: 'In Progress', order: 1 }
-            ]
+            // ОСТАВЛЯЕМ ТОЛЬКО ОДИН ОБЪЕКТ В МАССИВЕ
+            create: [{ title: 'To Do', order: 0 }]
           }
         },
         include: { columns: { include: { tasks: true } } }
       });
     } catch (e) {
-      // Если пока мы создавали, кто-то другой создал (race condition), просто ищем еще раз
       board = await prisma.board.findFirst({
         where: { userId: session.user.id },
         include: { columns: { include: { tasks: true } } }
