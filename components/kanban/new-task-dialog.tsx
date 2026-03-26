@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,35 +13,50 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '../ui/textarea';
-
 import { useTaskStore } from '@/lib/store';
 
-export default function NewTaskDialog() {
+// Добавляем пропс columnId, чтобы знать, в какую колонку пойдет задача
+interface NewTaskDialogProps {
+  columnId: string;
+}
+
+export default function NewTaskDialog({ columnId }: NewTaskDialogProps) {
+  const [open, setOpen] = useState(false);
   const addTask = useTaskStore((state) => state.addTask);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const form = e.currentTarget;
     const formData = new FormData(form);
-    const { title, description } = Object.fromEntries(formData);
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
 
-    if (typeof title !== 'string' || typeof description !== 'string') return;
-    addTask(title, description);
+    if (!title || title.trim() === '') return;
+
+    // Передаем columnId в стор для сохранения в БД
+    await addTask(columnId, title, description);
+
+    setOpen(false); // Закрываем диалог после успеха
+    form.reset(); // Очищаем поля
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm">
-          ＋ Add New Todo
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start text-muted-foreground hover:text-foreground"
+        >
+          ＋ Add New Task
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Todo</DialogTitle>
+          <DialogTitle>Add New Task</DialogTitle>
           <DialogDescription>
-            What do you want to get done today?
+            Describe the work that needs to be done.
           </DialogDescription>
         </DialogHeader>
         <form
@@ -52,25 +68,25 @@ export default function NewTaskDialog() {
             <Input
               id="title"
               name="title"
-              placeholder="Todo title..."
+              placeholder="Task title..."
               className="col-span-4"
+              autoFocus
+              required
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Textarea
               id="description"
               name="description"
-              placeholder="Description..."
+              placeholder="Detailed description (optional)..."
               className="col-span-4"
             />
           </div>
         </form>
         <DialogFooter>
-          <DialogTrigger asChild>
-            <Button type="submit" size="sm" form="todo-form">
-              Add Todo
-            </Button>
-          </DialogTrigger>
+          <Button type="submit" size="sm" form="todo-form">
+            Create Task
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

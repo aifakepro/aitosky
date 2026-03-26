@@ -1,4 +1,5 @@
-import { Task } from '@/lib/store';
+'use client';
+import { Task, Column } from '@/lib/store';
 import { useDndContext, type UniqueIdentifier } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -10,16 +11,10 @@ import { Card, CardContent, CardHeader } from '../ui/card';
 import { ColumnActions } from './column-action';
 import { TaskCard } from './task-card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-
-export interface Column {
-  id: UniqueIdentifier;
-  title: string;
-}
-
-export type ColumnType = 'Column';
+import NewTaskDialog from './new-task-dialog'; // Импортируем диалог задачи
 
 export interface ColumnDragData {
-  type: ColumnType;
+  type: 'Column';
   column: Column;
 }
 
@@ -58,11 +53,11 @@ export function BoardColumn({ column, tasks, isOverlay }: BoardColumnProps) {
   };
 
   const variants = cva(
-    'h-[75vh] max-h-[75vh] w-[350px] max-w-full bg-secondary flex flex-col flex-shrink-0 snap-center',
+    'h-[75vh] max-h-[75vh] w-[350px] max-w-full bg-secondary flex flex-col flex-shrink-0 snap-center rounded-xl border-none shadow-sm',
     {
       variants: {
         dragging: {
-          default: 'border-2 border-transparent',
+          default: '',
           over: 'ring-2 opacity-30',
           overlay: 'ring-2 ring-primary'
         }
@@ -78,31 +73,37 @@ export function BoardColumn({ column, tasks, isOverlay }: BoardColumnProps) {
         dragging: isOverlay ? 'overlay' : isDragging ? 'over' : undefined
       })}
     >
-      <CardHeader className="space-between flex flex-row items-center border-b-2 p-4 text-left font-medium">
+      <CardHeader className="space-between flex flex-row items-center border-b p-4 text-left font-medium">
         <Button
           variant={'ghost'}
           {...attributes}
           {...listeners}
-          className=" relative -ml-2 h-auto cursor-grab p-1 text-primary/50"
+          className="relative -ml-2 h-auto cursor-grab p-1 text-primary/50"
         >
           <span className="sr-only">{`Move column: ${column.title}`}</span>
-          <GripVertical />
+          <GripVertical size={20} />
         </Button>
-        {/* <span className="mr-auto !mt-0"> {column.title}</span> */}
-        {/* <Input
-          defaultValue={column.title}
-          className="text-base !mt-0 mr-auto"
-        /> */}
+
+        <span className="ml-2 mr-auto truncate">{column.title}</span>
+
         <ColumnActions id={column.id} title={column.title} />
       </CardHeader>
-      <CardContent className="flex flex-grow flex-col gap-4 overflow-x-hidden p-2">
-        <ScrollArea className="h-full">
-          <SortableContext items={tasksIds}>
-            {tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-          </SortableContext>
+
+      <CardContent className="flex flex-grow flex-col gap-2 overflow-hidden p-2">
+        <ScrollArea className="h-full pr-3">
+          <div className="flex flex-col gap-3 py-2">
+            <SortableContext items={tasksIds}>
+              {tasks.map((task) => (
+                <TaskCard key={task.id} task={task} />
+              ))}
+            </SortableContext>
+          </div>
         </ScrollArea>
+
+        {/* КНОПКА ДОБАВЛЕНИЯ ЗАДАЧИ ВНИЗУ КОЛОНКИ */}
+        <div className="mt-auto pt-2">
+          <NewTaskDialog columnId={column.id as string} />
+        </div>
       </CardContent>
     </Card>
   );
@@ -111,17 +112,20 @@ export function BoardColumn({ column, tasks, isOverlay }: BoardColumnProps) {
 export function BoardContainer({ children }: { children: React.ReactNode }) {
   const dndContext = useDndContext();
 
-  const variations = cva('px-2  pb-4 md:px-0 flex lg:justify-start', {
-    variants: {
-      dragging: {
-        default: '',
-        active: 'snap-none'
+  const variations = cva(
+    'flex h-full w-full items-start justify-start gap-4 px-4 pb-4',
+    {
+      variants: {
+        dragging: {
+          default: '',
+          active: 'snap-none'
+        }
       }
     }
-  });
+  );
 
   return (
-    <ScrollArea className="w-full whitespace-nowrap rounded-md">
+    <ScrollArea className="h-full w-full">
       <div
         className={variations({
           dragging: dndContext.active ? 'active' : 'default'
