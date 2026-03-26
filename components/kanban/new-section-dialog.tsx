@@ -16,13 +16,6 @@ import { useTaskStore } from '@/lib/store';
 export default function NewSectionDialog() {
   const [open, setOpen] = useState(false);
   const addCol = useTaskStore((state) => state.addCol);
-  // Нам нужен ID доски, к которой привязываем колонку
-  const boards = useTaskStore((state) => state.columns); // В твоем сторе данные лежат в columns (из первой доски)
-
-  // ВАЖНО: В реальном приложении мы должны знать ID доски.
-  // Пока возьмем заглушку или ID из первой загруженной колонки,
-  // но лучше, если в сторе будет храниться текущий boardId.
-  // Для теста предположим, что у нас есть доступ к колонкам, значит доска загружена.
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,16 +26,12 @@ export default function NewSectionDialog() {
 
     if (!title || title.trim() === '') return;
 
-    // Вызываем addCol из стора.
-    // Поскольку в твоей Prisma схеме Column требует boardId,
-    // передаем ID доски. Если досок пока нет, в роутере создастся дефолтная.
-    // Для этого примера передадим фиксированный ID или логику "первой доски"
-    const currentBoardId = 'default-board-id'; // Это значение должен возвращать твой GET /api/kanban
+    // ВАЖНО: Передаем только ОДИН аргумент (title),
+    // так как boardId стор возьмет сам из своего state.currentBoardId
+    await addCol(title);
 
-    await addCol(currentBoardId, title);
-
-    setOpen(false); // Закрываем диалог
-    form.reset(); // Сбрасываем форму
+    setOpen(false);
+    form.reset();
   };
 
   return (
