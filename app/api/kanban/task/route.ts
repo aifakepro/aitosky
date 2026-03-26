@@ -39,3 +39,17 @@ export async function PATCH(req: Request) {
 
   return NextResponse.json({ success: true });
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const taskId = searchParams.get('taskId');
+    if (!taskId)
+      return NextResponse.json({ error: 'taskId required' }, { status: 400 });
+
+    await prisma.task.delete({ where: { id: taskId } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: 'Fail' }, { status: 500 });
+  }
+}
