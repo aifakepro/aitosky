@@ -164,6 +164,8 @@ export function KanbanBoard() {
           overData.task.status
         );
 
+        const isNewColumn = overData.task.status !== pickedUpTaskColumn.current; // ← сначала проверяем
+
         // 👉 ВАЖНО: сохраняем в БД
         fetch('/api/kanban/task', {
           method: 'PATCH',
@@ -173,13 +175,13 @@ export function KanbanBoard() {
           body: JSON.stringify({
             taskId: task.id,
             newColumnId: overData.task.status,
-            newOrder: taskPosition // пока простой порядок
+            newOrder: taskPosition
           })
         });
 
-        pickedUpTaskColumn.current = null;
+        pickedUpTaskColumn.current = null; // ← только потом обнуляем
 
-        if (overData.task.status !== pickedUpTaskColumn.current) {
+        if (isNewColumn) {
           return `Task was dropped into column ${column?.title} in position ${
             taskPosition + 1
           } of ${tasksInColumn.length}`;
@@ -192,6 +194,7 @@ export function KanbanBoard() {
 
       pickedUpTaskColumn.current = null;
     },
+
     onDragCancel({ active }) {
       pickedUpTaskColumn.current = null;
       if (hasDraggableData(active) && active.data.current?.type === 'Task') {
