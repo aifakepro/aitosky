@@ -29,7 +29,16 @@ export async function GET() {
             create: [{ title: 'To Do', order: 0 }]
           }
         },
-        include: { columns: { include: { tasks: true } } }
+        include: {
+          columns: {
+            orderBy: { order: 'asc' },
+            include: {
+              tasks: {
+                orderBy: { order: 'asc' } // ВОТ ЭТО ОБЯЗАТЕЛЬНО ДОБАВИТЬ
+              }
+            }
+          }
+        }
       });
     } catch (e) {
       board = await prisma.board.findFirst({
