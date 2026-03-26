@@ -141,7 +141,7 @@ export function AreaGraph({ data = defaultChartData }: AreaGraphProps) {
         <div className="flex items-center gap-2 text-sm font-medium leading-none">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
-        <div className="text-sm text-muted-foreground">January - June 2024</div>
+        <div className="text-sm text-muted-foreground">2026</div>
       </CardFooter>
     </Card>
   );
