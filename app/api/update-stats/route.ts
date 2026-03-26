@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { userId, barData, areaData, apiKey } = body;
+    const { userId, barData, areaData, pieData, apiKey } = body;
 
     // 1. Проверка API ключа
     if (apiKey !== process.env.MY_SECRET_SERVER_KEY) {
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Проверка наличия данных
-    if (!userId || !barData || !areaData) {
+    if (!userId || !barData || !areaData || !pieData) {
       return NextResponse.json(
         { error: 'Missing required data' },
         { status: 400 }
@@ -39,6 +39,15 @@ export async function POST(req: Request) {
           month: item.month, // напр. "2024-01"
           desktop: item.desktop,
           mobile: item.mobile,
+          userId
+        }))
+      });
+
+      await tx.dashboardPieChart.deleteMany({ where: { userId } });
+      await tx.dashboardPieChart.createMany({
+        data: pieData.map((item: any) => ({
+          browser: item.browser,
+          visitors: item.visitors,
           userId
         }))
       });
