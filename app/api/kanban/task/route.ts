@@ -29,40 +29,68 @@ export async function PATCH(req: Request) {
     const { taskId, newColumnId, newOrder } = await req.json();
 
     await prisma.$transaction(async (tx) => {
-      // 1. Сначала просто "перекидываем" нашу задачу в нужную колонку
-      // Мы даем ей временный порядок -1, чтобы она не мешала при сортировке остальных
-      await tx.task.update({
-        where: { id: taskId },
-        data: { columnId: newColumnId, order: -1 }
+      // 1. Находим задачу, чтобы узнать её СТАРУЮ колонку
+      const taskBeforeMove = await tx.task.findUnique({
+        where: { id: taskId }
       });
 
-      // 2. Получаем ВСЕ задачи этой колонки, отсортированные по текущему порядку
-      const allTasks = await tx.task.findMany({
+      if (!taskBeforeMove) return;
+
+      const sourceColumnId = taskBeforeMove.columnId;
+
+      // 2. ВРЕМЕННО перемещаем задачу в новую колонку с порядком -1
+      // (чтобы она не мешалась при пересчете других задач)
+      await tx.task.update({
+        where: { id: taskId },
+        data: {
+          columnId: newColumnId,
+          order: -1
+        }
+      });
+
+      // 3. НОРМАЛИЗАЦИЯ ЦЕЛЕВОЙ КОЛОНКИ (куда пришли)
+      const targetTasks = await tx.task.findMany({
         where: { columnId: newColumnId },
         orderBy: { order: 'asc' }
       });
 
-      // 3. Вынимаем нашу перемещенную задачу из списка
-      const movedTask = allTasks.find((t) => t.id === taskId);
-      const otherTasks = allTasks.filter((t) => t.id !== taskId);
+      const movedTask = targetTasks.find((t) => t.id === taskId);
+      const otherTargetTasks = targetTasks.filter((t) => t.id !== taskId);
 
-      if (!movedTask) return;
+      if (movedTask) {
+        // Вставляем нашу задачу в массив на нужное место
+        otherTargetTasks.splice(newOrder, 0, movedTask);
 
-      // 4. Вставляем её в массив строго на то место (индекс), которое пришло с фронта
-      otherTasks.splice(newOrder, 0, movedTask);
+        // Переписываем порядок всем в этой колонке: 0, 1, 2...
+        for (let i = 0; i < otherTargetTasks.length; i++) {
+          await tx.task.update({
+            where: { id: otherTargetTasks[i].id },
+            data: { order: i }
+          });
+        }
+      }
 
-      // 5. Теперь циклом перезаписываем всем задачам в колонке их реальные индексы 0, 1, 2, 3...
-      // Это "выравнивает" нумерацию, даже если раньше там были дырки (типа 0, 2, 4)
-      for (let i = 0; i < otherTasks.length; i++) {
-        await tx.task.update({
-          where: { id: otherTasks[i].id },
-          data: { order: i }
+      // 4. НОРМАЛИЗАЦИЯ ИСТОЧНИКА (откуда ушли)
+      // Делаем это только если колонки РАЗНЫЕ
+      if (sourceColumnId !== newColumnId) {
+        const sourceTasks = await tx.task.findMany({
+          where: { columnId: sourceColumnId },
+          orderBy: { order: 'asc' }
         });
+
+        // Просто переписываем им порядок 0, 1, 2..., чтобы закрыть дырку
+        for (let i = 0; i < sourceTasks.length; i++) {
+          await tx.task.update({
+            where: { id: sourceTasks[i].id },
+            data: { order: i }
+          });
+        }
       }
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('PATCH_TASK_ERROR:', error);
     return NextResponse.json({ error: 'Fail' }, { status: 500 });
   }
 }
