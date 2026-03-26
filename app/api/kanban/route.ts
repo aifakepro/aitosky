@@ -6,7 +6,8 @@ export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json([], { status: 401 });
 
-  let data = await prisma.board.findMany({
+  // Ищем доски пользователя
+  let boards = await prisma.board.findMany({
     where: { userId: session.user.id },
     include: {
       columns: {
@@ -16,15 +17,15 @@ export async function GET() {
     }
   });
 
-  // Если досок нет - создаем дефолтную, чтобы не было 404 в интерфейсе
-  if (data.length === 0) {
+  // Если досок нет - создаем ОДНУ (используем upsert или простую проверку)
+  if (boards.length === 0) {
     const defaultBoard = await prisma.board.create({
       data: {
-        title: 'Main Project',
+        title: 'Main Board',
         userId: session.user.id,
         columns: {
           create: [
-            { title: 'To Do', order: 0 },
+            { title: 'Todo', order: 0 },
             { title: 'In Progress', order: 1 }
           ]
         }
@@ -34,5 +35,18 @@ export async function GET() {
     return NextResponse.json([defaultBoard]);
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json(boards);
+}
+
+// Для изменения названия доски
+export async function PATCH(req: Request) {
+  const body = await req.json();
+  const { boardId, title } = body;
+
+  const updatedBoard = await prisma.board.update({
+    where: { id: boardId },
+    data: { title }
+  });
+
+  return NextResponse.json(updatedBoard);
 }
