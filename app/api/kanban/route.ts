@@ -6,6 +6,7 @@ export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json([], { status: 401 });
 
+  // Проверяем, есть ли уже доска
   let board = await prisma.board.findFirst({
     where: { userId: session.user.id },
     include: {
@@ -16,20 +17,29 @@ export async function GET() {
     }
   });
 
+  // Если доски нет — создаем её ОДНУ
   if (!board) {
-    board = await prisma.board.create({
-      data: {
-        title: 'Main Board',
-        userId: session.user.id,
-        columns: {
-          create: [
-            { title: 'To Do', order: 0 },
-            { title: 'In Progress', order: 1 }
-          ]
-        }
-      },
-      include: { columns: { include: { tasks: true } } }
-    });
+    try {
+      board = await prisma.board.create({
+        data: {
+          title: 'Main Project',
+          userId: session.user.id,
+          columns: {
+            create: [
+              { title: 'To Do', order: 0 },
+              { title: 'In Progress', order: 1 }
+            ]
+          }
+        },
+        include: { columns: { include: { tasks: true } } }
+      });
+    } catch (e) {
+      // Если пока мы создавали, кто-то другой создал (race condition), просто ищем еще раз
+      board = await prisma.board.findFirst({
+        where: { userId: session.user.id },
+        include: { columns: { include: { tasks: true } } }
+      });
+    }
   }
 
   return NextResponse.json([board]);
