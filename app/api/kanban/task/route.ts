@@ -21,12 +21,8 @@ export async function PATCH(req: Request) {
     const { taskId, newColumnId, newOrder } = await req.json();
 
     await prisma.$transaction(async (tx) => {
-      // 1. Получаем задачу, которую двигаем
-      const movingTask = await tx.task.findUnique({ where: { id: taskId } });
-      if (!movingTask) return;
-
-      // 2. Сдвигаем все ОСТАЛЬНЫЕ задачи в целевой колонке,
-      // чтобы освободить место для нашей задачи
+      // 1. Сначала "раздвигаем" задачи в целевой колонке
+      // Все задачи, чей порядок >= нового, получают +1
       await tx.task.updateMany({
         where: {
           columnId: newColumnId,
@@ -35,22 +31,13 @@ export async function PATCH(req: Request) {
         data: { order: { increment: 1 } }
       });
 
-      // 3. Ставим нашу задачу на её новое место
+      // 2. Ставим нашу задачу на освободившееся место с новым номером
       await tx.task.update({
         where: { id: taskId },
         data: {
           columnId: newColumnId,
           order: newOrder
         }
-      });
-
-      // 4. (Опционально) "Схлопываем" дырку в старой колонке, откуда ушла задача
-      await tx.task.updateMany({
-        where: {
-          columnId: movingTask.columnId,
-          order: { gt: movingTask.order }
-        },
-        data: { order: { decrement: 1 } }
       });
     });
 

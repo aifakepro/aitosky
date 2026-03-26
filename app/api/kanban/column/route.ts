@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// Обязательно добавь это, чтобы данные всегда были свежими
-export const revalidate = 0;
-
 export async function POST(req: Request) {
   try {
     const { title, boardId } = await req.json();
+
+    // 1. Считаем колонки, чтобы дать новый order
+    const count = await prisma.column.count({ where: { boardId } });
+
     const column = await prisma.column.create({
-      data: { title, boardId, order: 0 }
+      data: {
+        title,
+        boardId,
+        order: count // Теперь первая будет 0, вторая 1 и т.д.
+      }
     });
     return NextResponse.json(column);
   } catch (e) {
@@ -16,23 +21,22 @@ export async function POST(req: Request) {
   }
 }
 
-// ЭТОГО МЕТОДА У ТЕБЯ НЕ БЫЛО — ОН НУЖЕН ДЛЯ ПЕРЕИМЕНОВАНИЯ
 export async function PATCH(req: Request) {
   try {
-    const { columnId, title } = await req.json();
+    const { columnId, title, order } = await req.json();
+
+    // Если пришел order — значит мы перетащили колонку
+    // Если пришел title — значит мы ее переименовали
     const updated = await prisma.column.update({
       where: { id: columnId },
-      data: { title }
+      data: {
+        title: title !== undefined ? title : undefined,
+        order: order !== undefined ? order : undefined
+      }
     });
+
     return NextResponse.json(updated);
   } catch (e) {
     return NextResponse.json({ error: 'Fail' }, { status: 500 });
   }
-}
-
-export async function DELETE(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get('columnId');
-  if (id) await prisma.column.delete({ where: { id } });
-  return NextResponse.json({ success: true });
 }
