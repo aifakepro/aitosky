@@ -17,27 +17,47 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const body = await req.json();
-  const { taskId, newColumnId, newOrder } = body;
+  try {
+    const { taskId, newColumnId, newOrder } = await req.json();
 
-  await prisma.$transaction(async (tx) => {
-    // Сдвигаем все задачи в целевой колонке вниз начиная с newOrder
-    await tx.task.updateMany({
-      where: {
-        columnId: newColumnId,
-        order: { gte: newOrder },
-        id: { not: taskId }
-      },
-      data: { order: { increment: 1 } }
+    await prisma.$transaction(async (tx) => {
+      // 1. Получаем задачу, которую двигаем
+      const movingTask = await tx.task.findUnique({ where: { id: taskId } });
+      if (!movingTask) return;
+
+      // 2. Сдвигаем все ОСТАЛЬНЫЕ задачи в целевой колонке,
+      // чтобы освободить место для нашей задачи
+      await tx.task.updateMany({
+        where: {
+          columnId: newColumnId,
+          order: { gte: newOrder }
+        },
+        data: { order: { increment: 1 } }
+      });
+
+      // 3. Ставим нашу задачу на её новое место
+      await tx.task.update({
+        where: { id: taskId },
+        data: {
+          columnId: newColumnId,
+          order: newOrder
+        }
+      });
+
+      // 4. (Опционально) "Схлопываем" дырку в старой колонке, откуда ушла задача
+      await tx.task.updateMany({
+        where: {
+          columnId: movingTask.columnId,
+          order: { gt: movingTask.order }
+        },
+        data: { order: { decrement: 1 } }
+      });
     });
 
-    await tx.task.update({
-      where: { id: taskId },
-      data: { columnId: newColumnId, order: newOrder }
-    });
-  });
-
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: 'Fail' }, { status: 500 });
+  }
 }
 
 export async function DELETE(req: Request) {
