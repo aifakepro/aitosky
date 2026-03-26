@@ -40,11 +40,23 @@ export const { auth, handlers, signOut, signIn } = NextAuth({
           };
         });
 
+        const pieData = [
+          { browser: 'chrome', visitors: 275, userId },
+          { browser: 'safari', visitors: 200, userId },
+          { browser: 'firefox', visitors: 287, userId },
+          { browser: 'edge', visitors: 173, userId },
+          { browser: 'other', visitors: 190, userId }
+        ];
+
         // 3. Атомарная запись в БД (все или ничего)
         await prisma.$transaction([
           prisma.dashboardBarChart.createMany({ data: barData }),
           prisma.dashboardAreaChart.createMany({
             data: areaData,
+            skipDuplicates: true
+          }),
+          prisma.dashboardPieChart.createMany({
+            data: pieData,
             skipDuplicates: true
           })
         ]);

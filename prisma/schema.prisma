@@ -34,6 +34,7 @@ model User {
   jobs     UserJob[]   // ← НОВАЯ связь
   dashboardBarChart DashboardBarChart[]
   dashboardAreaChart DashboardAreaChart[]
+  dashboardPieChart DashboardPieChart[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -141,4 +142,14 @@ model DashboardAreaChart {
   updatedAt DateTime @updatedAt // Авто-обновление времени изменения
 
   @@unique([userId, month])
+}
+
+model DashboardPieChart {
+  id       String @id @default(cuid())
+  browser  String
+  visitors Int
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, browser])
 }
