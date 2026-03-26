@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-// Если @/lib/prisma не находит, используй: ../../../lib/prisma
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 
@@ -7,10 +6,18 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    // Проверка: получили ли мы columnId?
+    if (!body.columnId) {
+      return NextResponse.json(
+        { error: 'columnId is required' },
+        { status: 400 }
+      );
+    }
+
     const task = await prisma.task.create({
       data: {
         title: body.title,
-        description: body.description,
+        description: body.description || '',
         columnId: body.columnId,
         order: body.order ?? 0
       }
@@ -18,9 +25,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json(task);
   } catch (error) {
-    console.error(error);
+    console.error('PRISMA_TASK_ERROR:', error);
     return NextResponse.json(
-      { error: 'Failed to create task' },
+      { error: 'Failed to create task', details: error },
       { status: 500 }
     );
   }
