@@ -6,8 +6,8 @@ export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json([], { status: 401 });
 
-  // Ищем доски пользователя
-  let boards = await prisma.board.findMany({
+  // Ищем только ОДНУ первую доску пользователя
+  let board = await prisma.board.findFirst({
     where: { userId: session.user.id },
     include: {
       columns: {
@@ -17,36 +17,22 @@ export async function GET() {
     }
   });
 
-  // Если досок нет - создаем ОДНУ (используем upsert или простую проверку)
-  if (boards.length === 0) {
-    const defaultBoard = await prisma.board.create({
+  // Если доски нет — создаем её ОДИН раз
+  if (!board) {
+    board = await prisma.board.create({
       data: {
         title: 'Main Board',
         userId: session.user.id,
         columns: {
           create: [
-            { title: 'Todo', order: 0 },
+            { title: 'To Do', order: 0 },
             { title: 'In Progress', order: 1 }
           ]
         }
       },
       include: { columns: { include: { tasks: true } } }
     });
-    return NextResponse.json([defaultBoard]);
   }
 
-  return NextResponse.json(boards);
-}
-
-// Для изменения названия доски
-export async function PATCH(req: Request) {
-  const body = await req.json();
-  const { boardId, title } = body;
-
-  const updatedBoard = await prisma.board.update({
-    where: { id: boardId },
-    data: { title }
-  });
-
-  return NextResponse.json(updatedBoard);
+  return NextResponse.json([board]); // Возвращаем массив с одной доской
 }
