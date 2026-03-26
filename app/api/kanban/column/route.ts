@@ -1,21 +1,19 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function POST(req: Request) {
+export async function PATCH(req: Request) {
   try {
-    const { title, boardId } = await req.json();
+    const { columnId, title, order } = await req.json();
 
-    // 1. Считаем колонки, чтобы дать новый order
-    const count = await prisma.column.count({ where: { boardId } });
-
-    const column = await prisma.column.create({
+    const updated = await prisma.column.update({
+      where: { id: columnId },
       data: {
-        title,
-        boardId,
-        order: count // Теперь первая будет 0, вторая 1 и т.д.
+        title: title || undefined,
+        order: order !== undefined ? Number(order) : undefined
       }
     });
-    return NextResponse.json(column);
+
+    return NextResponse.json(updated);
   } catch (e) {
     return NextResponse.json({ error: 'Fail' }, { status: 500 });
   }

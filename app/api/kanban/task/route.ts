@@ -3,16 +3,14 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
   const body = await req.json();
-
   const task = await prisma.task.create({
     data: {
       title: body.title,
-      description: body.description,
+      description: body.description || '',
       columnId: body.columnId,
-      order: body.order ?? 0
+      order: Number(body.order) ?? 0
     }
   });
-
   return NextResponse.json(task);
 }
 
@@ -20,29 +18,29 @@ export async function PATCH(req: Request) {
   try {
     const { taskId, newColumnId, newOrder } = await req.json();
 
-    await prisma.$transaction(async (tx) => {
-      // 1. Сначала "раздвигаем" задачи в целевой колонке
-      // Все задачи, чей порядок >= нового, получают +1
-      await tx.task.updateMany({
+    // 1. Сначала пересчитываем порядки в целевой колонке, чтобы освободить место
+    // (все задачи, которые должны быть ниже новой позиции, сдвигаем вниз)
+    await prisma.$transaction([
+      prisma.task.updateMany({
         where: {
           columnId: newColumnId,
-          order: { gte: newOrder }
+          order: { gte: Number(newOrder) },
+          id: { not: taskId } // не трогаем саму задачу, если она уже там была
         },
         data: { order: { increment: 1 } }
-      });
-
-      // 2. Ставим нашу задачу на освободившееся место с новым номером
-      await tx.task.update({
+      }),
+      prisma.task.update({
         where: { id: taskId },
         data: {
           columnId: newColumnId,
-          order: newOrder
+          order: Number(newOrder)
         }
-      });
-    });
+      })
+    ]);
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Fail' }, { status: 500 });
   }
 }
