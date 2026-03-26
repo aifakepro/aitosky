@@ -37,6 +37,11 @@ export default async function page() {
     }
   });
 
+  const pieData = await prisma.dashboardPieChart.findMany({
+    where: { userId },
+    select: { browser: true, visitors: true }
+  });
+
   return (
     <PageContainer scrollable={true}>
       <div className="space-y-2">
@@ -180,7 +185,7 @@ export default async function page() {
                 <AreaGraph data={areaData} />
               </div>
               <div className="col-span-4 md:col-span-3">
-                <PieGraph />
+                <PieGraph data={pieData} />
               </div>
             </div>
           </TabsContent>
