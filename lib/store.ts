@@ -20,6 +20,7 @@ export type Column = {
 export type State = {
   tasks: Task[];
   columns: Column[];
+  currentBoardId: string | null; // Храним ID текущей доски
   draggedTask: string | null;
   isLoading: boolean;
 };
@@ -35,7 +36,7 @@ export type Actions = {
     description?: string
   ) => Promise<void>;
   removeTask: (id: string) => Promise<void>;
-  setTasks: (updatedTasks: Task[]) => void; // Для локальных перемещений dnd-kit
+  setTasks: (updatedTasks: Task[]) => void;
   moveTask: (
     taskId: string,
     newColumnId: string,
@@ -43,7 +44,7 @@ export type Actions = {
   ) => Promise<void>;
 
   // Колонки
-  addCol: (boardId: string, title: string) => Promise<void>;
+  addCol: (title: string) => Promise<void>; // Упростили: берем boardId из стейта
   removeCol: (id: UniqueIdentifier) => Promise<void>;
   updateCol: (id: UniqueIdentifier, newName: string) => Promise<void>;
   setCols: (cols: Column[]) => void;
@@ -54,22 +55,24 @@ export type Actions = {
 export const useTaskStore = create<State & Actions>((set, get) => ({
   tasks: [],
   columns: [],
+  currentBoardId: null,
   draggedTask: null,
   isLoading: false,
 
-  // 1. Загрузка данных из API
+  // 1. Загрузка данных из API (GET /api/kanban)
   fetchBoardData: async () => {
     set({ isLoading: true });
     try {
-      const response = await fetch('/api/kanban'); // Твой GET роутер
+      const response = await fetch('/api/kanban');
+      if (!response.ok) throw new Error('Failed to fetch board');
+
       const boards = await response.json();
 
-      // Предположим, мы работаем с первой доской (Board)
       if (boards && boards.length > 0) {
         const board = boards[0];
         set({
+          currentBoardId: board.id, // Запоминаем ID доски для создания колонок
           columns: board.columns || [],
-          // Плоский список всех задач для удобства поиска
           tasks: board.columns.flatMap((col: Column) => col.tasks) || []
         });
       }
@@ -80,7 +83,7 @@ export const useTaskStore = create<State & Actions>((set, get) => ({
     }
   },
 
-  // 2. Добавление задачи
+  // 2. Добавление задачи (POST /api/kanban/task)
   addTask: async (columnId: string, title: string, description?: string) => {
     try {
       const response = await fetch('/api/kanban/task', {
@@ -90,18 +93,18 @@ export const useTaskStore = create<State & Actions>((set, get) => ({
           title,
           description,
           columnId,
-          order: get().tasks.length
+          order: get().tasks.filter((t) => t.columnId === columnId).length
         })
       });
       if (response.ok) {
-        await get().fetchBoardData(); // Перезагружаем данные
+        await get().fetchBoardData(); // Перезагружаем всё дерево данных
       }
     } catch (error) {
       console.error('Ошибка создания задачи:', error);
     }
   },
 
-  // 3. Перемещение задачи (вызывается в конце Drag & Drop)
+  // 3. Перемещение задачи (PATCH /api/kanban/task)
   moveTask: async (taskId: string, newColumnId: string, newOrder: number) => {
     try {
       const response = await fetch('/api/kanban/task', {
@@ -117,53 +120,77 @@ export const useTaskStore = create<State & Actions>((set, get) => ({
     }
   },
 
-  // 4. Удаление задачи
+  // 4. Удаление задачи (DELETE /api/kanban/task?taskId=...)
   removeTask: async (id: string) => {
     try {
-      await fetch(`/api/kanban/task/${id}`, { method: 'DELETE' });
-      await get().fetchBoardData();
+      const response = await fetch(`/api/kanban/task?taskId=${id}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        await get().fetchBoardData();
+      }
     } catch (error) {
       console.error('Ошибка удаления задачи:', error);
     }
   },
 
-  // 5. Колонки
-  addCol: async (boardId: string, title: string) => {
+  // 5. Создание колонки (POST /api/kanban/column)
+  addCol: async (title: string) => {
+    const { currentBoardId } = get();
+    if (!currentBoardId) {
+      console.error('Нет ID доски для создания колонки');
+      return;
+    }
+
     try {
-      await fetch('/api/kanban/column', {
+      const response = await fetch('/api/kanban/column', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, boardId, order: get().columns.length })
+        body: JSON.stringify({
+          title,
+          boardId: currentBoardId,
+          order: get().columns.length
+        })
       });
-      await get().fetchBoardData();
+      if (response.ok) {
+        await get().fetchBoardData();
+      }
     } catch (error) {
       console.error('Ошибка создания колонки:', error);
     }
   },
 
+  // 6. Удаление колонки (DELETE /api/kanban/column?columnId=...)
   removeCol: async (id: UniqueIdentifier) => {
     try {
-      await fetch(`/api/kanban/column/${id}`, { method: 'DELETE' });
-      await get().fetchBoardData();
+      const response = await fetch(`/api/kanban/column?columnId=${id}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        await get().fetchBoardData();
+      }
     } catch (error) {
       console.error('Ошибка удаления колонки:', error);
     }
   },
 
+  // 7. Обновление названия колонки (PATCH /api/kanban/column)
   updateCol: async (id: UniqueIdentifier, newName: string) => {
     try {
-      await fetch(`/api/kanban/column/${id}`, {
+      const response = await fetch(`/api/kanban/column`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: newName })
+        body: JSON.stringify({ columnId: id, title: newName })
       });
-      await get().fetchBoardData();
+      if (response.ok) {
+        await get().fetchBoardData();
+      }
     } catch (error) {
       console.error('Ошибка обновления колонки:', error);
     }
   },
 
-  // Локальные методы для UI (синхронные)
+  // Локальные методы для плавной работы Drag-and-Drop в UI
   dragTask: (id: string | null) => set({ draggedTask: id }),
   setTasks: (newTasks: Task[]) => set({ tasks: newTasks }),
   setCols: (newCols: Column[]) => set({ columns: newCols })
