@@ -3,35 +3,22 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { title, boardId, order } = body;
+    const { title, boardId } = await req.json();
+    if (!boardId)
+      return NextResponse.json({ error: 'No Board ID' }, { status: 400 });
 
     const column = await prisma.column.create({
-      data: {
-        title,
-        boardId,
-        order: order ?? 0
-      }
+      data: { title, boardId, order: 0 }
     });
-
     return NextResponse.json(column);
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to create column' },
-      { status: 500 }
-    );
+  } catch (e) {
+    return NextResponse.json({ error: 'Fail' }, { status: 500 });
   }
 }
 
 export async function DELETE(req: Request) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('columnId');
-
-  if (!id) return NextResponse.json({ error: 'No ID' }, { status: 400 });
-
-  await prisma.column.delete({
-    where: { id }
-  });
-
+  if (id) await prisma.column.delete({ where: { id } });
   return NextResponse.json({ success: true });
 }

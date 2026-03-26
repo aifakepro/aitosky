@@ -6,7 +6,6 @@ export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json([], { status: 401 });
 
-  // Ищем только ОДНУ первую доску пользователя
   let board = await prisma.board.findFirst({
     where: { userId: session.user.id },
     include: {
@@ -17,7 +16,6 @@ export async function GET() {
     }
   });
 
-  // Если доски нет — создаем её ОДИН раз
   if (!board) {
     board = await prisma.board.create({
       data: {
@@ -34,5 +32,5 @@ export async function GET() {
     });
   }
 
-  return NextResponse.json([board]); // Возвращаем массив с одной доской
+  return NextResponse.json([board]);
 }
