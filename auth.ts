@@ -22,21 +22,27 @@ export const { auth, handlers, signOut, signIn } = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        console.log('🔑 authorize called:', credentials?.email);
 
-        // Ищем пользователя в базе
+        if (!credentials?.email || !credentials?.password) {
+          console.log('❌ no credentials');
+          return null;
+        }
+
         const user = await prisma.user.findUnique({
           where: { email: credentials.email as string }
         });
 
-        // Если пользователя нет, или у него нет пароля (входил только через Google)
+        console.log('👤 user found:', !!user, '| has password:', !!user?.password);
+
         if (!user || !user.password) return null;
 
-        // Проверяем, совпадает ли пароль
         const passwordsMatch = await bcrypt.compare(
           credentials.password as string,
           user.password
         );
+
+        console.log('🔐 passwords match:', passwordsMatch);
 
         if (passwordsMatch) return user;
         return null;
