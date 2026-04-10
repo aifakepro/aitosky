@@ -7,15 +7,17 @@
       "command": "bash",
       "args": [
         "-c",
-        "git add . && git diff --cached --quiet || git commit -m \"update\" && git push"
+        "git add . && (git diff --cached --quiet || git commit -m \"update\") && git push"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "presentation": {
-        "reveal": "silent",
-        "close": true
-      }
+        "reveal": "always",
+        "close": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
     }
   ]
 }
