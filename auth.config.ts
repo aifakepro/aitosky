@@ -1,7 +1,8 @@
 import { NextAuthConfig } from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Github from 'next-auth/providers/github';
-// УДАЛИТЕ: import { prisma } from '@/lib/prisma';
+import Credentials from 'next-auth/providers/credentials';
+import bcrypt from 'bcryptjs';
 
 const authConfig: NextAuthConfig = {
   providers: [
@@ -12,12 +13,33 @@ const authConfig: NextAuthConfig = {
     Github({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET
+    }),
+    Credentials({
+      name: 'credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        // Тут не можемо імпортувати prisma (edge runtime)
+        // Тому робимо fetch до свого API route
+        const res = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: credentials.email,
+            password: credentials.password
+          })
+        });
+
+        if (!res.ok) return null;
+        return res.json();
+      }
     })
   ],
-  pages: {
-    signIn: '/'
-  },
-  // УДАЛИТЕ EVENTS - они не работают в edge
+  pages: { signIn: '/' },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
