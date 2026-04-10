@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     }
 
     // 3. Выполняем полное обновление в одной транзакции
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0]) => {
       // --- Обновляем BarChart ---
       await tx.dashboardBarChart.deleteMany({ where: { userId } });
       await tx.dashboardBarChart.createMany({
