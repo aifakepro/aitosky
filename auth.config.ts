@@ -7,7 +7,14 @@ const authConfig: NextAuthConfig = {
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      authorization: {
+        params: {
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code'
+        }
+      }
     }),
     Github({
       clientId: process.env.GITHUB_ID,
@@ -22,8 +29,6 @@ const authConfig: NextAuthConfig = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // Тут не можемо імпортувати prisma (edge runtime)
-        // Тому робимо fetch до свого API route
         const res = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/verify`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
