@@ -6,8 +6,10 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { email, password, name } = body;
+    console.log("Получены данные регистрации:", body);
 
     if (!email || !password) {
+      console.log("Ошибка: не переданы email или password");
       return NextResponse.json({ message: "Заполните почту и пароль" }, { status: 400 });
     }
 
