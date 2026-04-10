@@ -1,84 +1,67 @@
-import NextAuth from 'next-auth';
-import { PrismaAdapter } from '@auth/prisma-adapter';
-import { prisma } from '@/lib/prisma';
-import authConfig from './auth.config';
+import { NextAuthConfig } from 'next-auth';
+import Google from 'next-auth/providers/google';
+import Github from 'next-auth/providers/github';
+import Credentials from 'next-auth/providers/credentials';
 
-export const { auth, handlers, signOut, signIn } = NextAuth({
-  adapter: PrismaAdapter(prisma),
-  session: { strategy: 'jwt' },
-  ...authConfig,
-  events: {
-    async createUser({ user }) {
-      if (!user?.id) return;
+const authConfig: NextAuthConfig = {
+  providers: [
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      authorization: {
+        params: {
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code'
+        }
+      }
+    }),
+    Github({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET
+    }),
+    Credentials({
+      name: 'credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
 
-      const userId = user.id;
-      const today = new Date();
-
-      try {
-        // 1. Генерация данных для BarChart (30 дней)
-        const barData = Array.from({ length: 30 }).map((_, i) => {
-          const d = new Date(today);
-          d.setDate(today.getDate() + i);
-          return {
-            date: d.toISOString().split('T')[0],
-            desktop: 5,
-            mobile: 5,
-            userId
-          };
-        });
-
-        // 2. Генерация данных для AreaChart (6 месяцев)
-        const areaData = Array.from({ length: 6 }).map((_, i) => {
-          const d = new Date(today);
-          d.setDate(1); // Защита от ошибок при переходе месяцев (напр. с 31 числа)
-          d.setMonth(today.getMonth() + i);
-          return {
-            month: d.toISOString().slice(0, 7),
-            desktop: 5,
-            mobile: 5,
-            userId
-          };
-        });
-
-        const pieData = [
-          { browser: 'chrome', visitors: 275, userId },
-          { browser: 'safari', visitors: 200, userId },
-          { browser: 'firefox', visitors: 287, userId },
-          { browser: 'edge', visitors: 173, userId },
-          { browser: 'other', visitors: 190, userId }
-        ];
-
-        // 3. Атомарная запись в БД (все или ничего)
-        await prisma.$transaction([
-          prisma.dashboardBarChart.createMany({ data: barData }),
-          prisma.dashboardAreaChart.createMany({
-            data: areaData,
-            skipDuplicates: true
-          }),
-          prisma.dashboardPieChart.createMany({
-            data: pieData,
-            skipDuplicates: true
+        const res = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: credentials.email,
+            password: credentials.password
           })
-        ]);
-
-        console.log(
-          `✅ Данные графиков инициализированы для пользователя: ${userId}`
-        );
-      } catch (error) {
-        console.error(
-          '❌ Ошибка при инициализации данных пользователя:',
-          error
-        );
-      }
-    },
-
-    async signIn({ user }) {
-      if (user?.id) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { lastLoginAt: new Date() }
         });
+
+        if (!res.ok) return null;
+        return res.json();
       }
+    })
+  ],
+  pages: { signIn: '/' },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = (user as any).role;
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        (session.user as any).role = token.role;
+        (session.user as any).id = token.id as string;
+      }
+      return session;
     }
-  }
-});
+  },
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+  trustHost: true
+};
+
+export default authConfig;
