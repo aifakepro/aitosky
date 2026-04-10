@@ -4,7 +4,6 @@ import UserAuthForm from '@/components/forms/user-auth-form';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Icons } from '@/components/icons';
-import Image from 'next/image';
 
 export const metadata: Metadata = {
   title: 'Authentication',
@@ -23,24 +22,18 @@ export default function AuthenticationPage() {
       >
         Login
       </Link>
-      <div className="relative hidden h-full flex-col bg-muted p-10 text-foreground dark:border-r lg:flex">
-        <Image
-          src="/Auth.png"
-          alt="Auth background"
-          fill
-          className="object-cover"
-        />
+      <div className="relative hidden h-full flex-col bg-muted p-10 text-foreground lg:flex dark:border-r">
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#396afc] via-[#c128d0] to-[#fa903f] dark:from-[#312ecb] dark:via-[#c128d0] dark:to-[#ff5e62]" />
         <div className="relative z-20 flex items-center text-lg font-medium">
-          <Icons.logo className="mr-2" />
-          AIcanBUY
+          <Icons.logo className='mr-2' />
+          TeamPulse
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              IF YOU ARE HUNGRY, YOU THINK ABOUT FOOD. IF YOU WANT TO BE RICH -
-              THINK ABOUT MONEY.
+              &ldquo;The way your employees feel is the way your customers will feel. And if your employees don&apos;t feel valued, neither will your customers.&rdquo;
             </p>
-            <footer className="text-sm text-foreground"></footer>
+            <footer className="text-sm text-foreground">-Sybil F. Stershic</footer>
           </blockquote>
         </div>
       </div>

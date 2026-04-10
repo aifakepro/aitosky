@@ -5,8 +5,6 @@ import { CalendarDateRangePicker } from '@/components/date-range-picker';
 import PageContainer from '@/components/layout/page-container';
 import { RecentSales } from '@/components/recent-sales';
 import { Button } from '@/components/ui/button';
-import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
 import {
   Card,
   CardContent,
@@ -16,32 +14,7 @@ import {
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-export default async function page() {
-  const session = await auth();
-  const userId = session?.user?.id;
-
-  // 1. Загружаем данные для обоих графиков сразу
-  // Используем select, чтобы не тянуть ID и даты, из-за которых всё падает
-  const barData = await prisma.dashboardBarChart.findMany({
-    where: { userId: userId },
-    orderBy: { date: 'asc' }
-  });
-
-  const areaData = await prisma.dashboardAreaChart.findMany({
-    where: { userId: userId },
-    orderBy: { month: 'asc' },
-    select: {
-      month: true,
-      desktop: true,
-      mobile: true
-    }
-  });
-
-  const pieData = await prisma.dashboardPieChart.findMany({
-    where: { userId },
-    select: { browser: true, visitors: true }
-  });
-
+export default function page() {
   return (
     <PageContainer scrollable={true}>
       <div className="space-y-2">
@@ -167,7 +140,7 @@ export default async function page() {
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
               <div className="col-span-4">
-                <BarGraph data={barData} />
+                <BarGraph />
               </div>
               <Card className="col-span-4 md:col-span-3">
                 <CardHeader>
@@ -181,11 +154,10 @@ export default async function page() {
                 </CardContent>
               </Card>
               <div className="col-span-4">
-                {/* Теперь тут передаются данные из базы */}
-                <AreaGraph data={areaData} />
+                <AreaGraph />
               </div>
               <div className="col-span-4 md:col-span-3">
-                <PieGraph data={pieData} />
+                <PieGraph />
               </div>
             </div>
           </TabsContent>

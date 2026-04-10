@@ -111,40 +111,41 @@ export type Employee = {
   profile_picture?: string | null;
 };
 
-export const navItems: (NavItem & { roles?: string[] })[] = [
+export const navItems: NavItem[] = [
   {
     title: 'Dashboard',
     href: '/dashboard',
     icon: 'dashboard',
-    label: 'Dashboard',
-    roles: ['admin', 'user'] // Бачать всі
+    label: 'Dashboard'
   },
   {
     title: 'User',
     href: '/dashboard/user',
     icon: 'user',
-    label: 'user',
-    roles: ['user', 'admin'] // Тільки адмін
+    label: 'user'
   },
   {
     title: 'Employee',
     href: '/dashboard/employee',
     icon: 'employee',
-    label: 'employee',
-    roles: ['user', 'admin'] // Тільки адмін
-  },
-  {
-    title: 'My Tasks',
-    href: '/dashboard/kanban', // ← было /dashboard/tasks
-    icon: 'kanban',
-    label: 'tasks',
-    roles: ['user', 'admin']
+    label: 'employee'
   },
   {
     title: 'Profile',
     href: '/dashboard/profile',
     icon: 'profile',
-    label: 'profile',
-    roles: ['user', 'admin']
+    label: 'profile'
+  },
+  {
+    title: 'Kanban',
+    href: '/dashboard/kanban',
+    icon: 'kanban',
+    label: 'kanban'
+  },
+  {
+    title: 'Logout',
+    href: '/',
+    icon: 'logout',
+    label: 'logout'
   }
 ];

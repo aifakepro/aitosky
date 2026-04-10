@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { signOut, useSession } from 'next-auth/react';
-import Link from 'next/link';
 export function UserNav() {
   const { data: session } = useSession();
   if (session) {
@@ -42,18 +41,9 @@ export function UserNav() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem asChild>
-              <Link
-                href="/dashboard/profile"
-                className="flex w-full items-center justify-between"
-              >
-                Profile
-                <img
-                  src="/F32.png"
-                  alt="Profile icon"
-                  className="ml-2 h-4 w-4"
-                />
-              </Link>
+            <DropdownMenuItem>
+              Profile
+              <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </DropdownMenuItem>
             <DropdownMenuItem>
               Billing

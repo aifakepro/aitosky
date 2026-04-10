@@ -1,60 +1,54 @@
 import { NextAuthConfig } from 'next-auth';
-import Google from 'next-auth/providers/google';
-import Github from 'next-auth/providers/github';
-import Credentials from 'next-auth/providers/credentials';
+import CredentialProvider from 'next-auth/providers/credentials';
+import GithubProvider from 'next-auth/providers/github';
 
 const authConfig: NextAuthConfig = {
   providers: [
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET
+    GithubProvider({
+      clientId: process.env.GITHUB_ID ?? '',
+      clientSecret: process.env.GITHUB_SECRET ?? ''
     }),
-    Github({
-      clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRET
-    }),
-    Credentials({
-      name: 'credentials',
+    CredentialProvider({
       credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        email: {
+          type: 'email'
+        },
+        password: {
+          type: 'password'
+        }
       },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-
-        const res = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/verify`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: credentials.email,
-            password: credentials.password
-          })
-        });
-
-        if (!res.ok) return null;
-        return res.json();
+      async authorize(credentials, req) {
+        const user = {
+          id: '1',
+          name: 'John',
+          email: credentials?.email as string
+        };
+        if (user) {
+          // Any object returned will be saved in `user` property of the JWT
+          return user;
+        } else {
+          // If you return null then an error will be displayed advising the user to check their details.
+          return null;
+          // You can also Reject this callback with an Error thus the user will be sent to the error page with the error message as a query parameter
+        }
       }
     })
   ],
-  pages: { signIn: '/' },
+  pages: {
+    signIn: '/' //sigin page
+  },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = (user as any).role;
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        (session.user as any).role = token.role;
-        (session.user as any).id = token.id as string;
-      }
-      return session;
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     }
   },
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-  trustHost: true
+  debug: process.env.NODE_ENV !== 'production',
+  secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true,
 };
 
 export default authConfig;

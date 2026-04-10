@@ -40,36 +40,24 @@ export function ColumnActions({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Функция сохранения (вынесли отдельно, чтобы использовать и в сабмите, и в блюре)
-  const handleSave = React.useCallback(async () => {
-    if (editDisable) return; // Если уже заблокировано - ничего не делаем
-
-    if (name !== title && name.trim() !== '') {
-      await updateCol(id, name);
-      toast({
-        title: 'Name Updated',
-        variant: 'default',
-        description: `${title} updated to ${name}`
-      });
-    } else {
-      setName(title); // Возвращаем старое имя, если новое пустое
-    }
-    setIsEditDisable(true); // Закрываем режим редактирования
-  }, [editDisable, id, name, title, updateCol, toast]);
-
   return (
     <>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          handleSave();
+          setIsEditDisable(!editDisable);
+          updateCol(id, name);
+          toast({
+            title: 'Name Updated',
+            variant: 'default',
+            description: `${title} updated to ${name}`
+          });
         }}
       >
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          onBlur={handleSave} // СОХРАНЕНИЕ ПРИ КЛИКЕ МИМО (для мобилок и ПК)
-          className="!mt-0 mr-auto text-base focus-visible:ring-1 disabled:cursor-pointer disabled:border-none disabled:opacity-100"
+          className="!mt-0 mr-auto text-base disabled:cursor-pointer disabled:border-none disabled:opacity-100"
           disabled={editDisable}
           ref={inputRef}
         />
@@ -84,11 +72,10 @@ export function ColumnActions({
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             onSelect={() => {
-              setIsEditDisable(false); // Разрешаем редактирование
+              setIsEditDisable(!editDisable);
               setTimeout(() => {
-                inputRef.current?.focus();
-                inputRef.current?.select(); // Сразу выделяем текст для удобства
-              }, 100);
+                inputRef.current && inputRef.current?.focus();
+              }, 500);
             }}
           >
             Rename
@@ -103,7 +90,6 @@ export function ColumnActions({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -119,7 +105,9 @@ export function ColumnActions({
             <Button
               variant="destructive"
               onClick={() => {
+                // yes, you have to set a timeout
                 setTimeout(() => (document.body.style.pointerEvents = ''), 100);
+
                 setShowDeleteDialog(false);
                 removeCol(id);
                 toast({

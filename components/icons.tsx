@@ -36,15 +36,7 @@ export type Icon = LucideIcon;
 
 export const Icons = {
   dashboard: LayoutDashboardIcon,
-  logo: ({ className }: { className?: string }) => (
-    <img
-      src="/F32.png"
-      alt="logo"
-      width={32}
-      height={32}
-      className={className}
-    />
-  ),
+  logo: Slack,
   login: LogIn,
   close: X,
   profile: UserCog,

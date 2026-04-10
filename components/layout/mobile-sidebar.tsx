@@ -4,22 +4,15 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { navItems } from '@/constants/data';
 import { MenuIcon } from 'lucide-react';
 import { useState } from 'react';
-import { useSession } from 'next-auth/react'; // ← добавь
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+// import { Playlist } from "../data/playlists";
+
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
+  // playlists: Playlist[];
+}
 
 export function MobileSidebar({ className }: SidebarProps) {
   const [open, setOpen] = useState(false);
-  const { data: session } = useSession(); // ← добавь
-
-  const userRole = (session?.user as any)?.role || 'user'; // ← добавь
-
-  const filteredNavItems = navItems.filter((item) => {
-    // ← добавь
-    if (item.roles) return item.roles.includes(userRole);
-    return true;
-  });
-
   return (
     <>
       <Sheet open={open} onOpenChange={setOpen}>
@@ -34,7 +27,7 @@ export function MobileSidebar({ className }: SidebarProps) {
               </h2>
               <div className="space-y-1">
                 <DashboardNav
-                  items={filteredNavItems} // ← заменил navItems
+                  items={navItems}
                   isMobileNav={true}
                   setOpen={setOpen}
                 />
