@@ -4,25 +4,11 @@ import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
-    const text = await req.text();
-    console.log("📨 RAW body text:", text);
-
-    let body: { email?: string; password?: string; name?: string };
-    try {
-      body = JSON.parse(text);
-    } catch {
-      console.log("❌ JSON parse failed");
-      return NextResponse.json({ message: "Invalid JSON" }, { status: 400 });
-    }
-
-    console.log("📦 Parsed body:", body);
-    console.log("📧 email:", body.email);
-    console.log("🔑 password exists:", !!body.password);
-
+    // 1. Правильный парсинг JSON в Next.js
+    const body = await req.json();
     const { email, password, name } = body;
 
     if (!email || !password) {
-      console.log("❌ Missing email or password");
       return NextResponse.json({ message: "Заполните почту и пароль" }, { status: 400 });
     }
 
@@ -33,6 +19,7 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // 2. Создаем пользователя
     const user = await prisma.user.create({
       data: {
         email,
@@ -42,12 +29,57 @@ export async function POST(req: Request) {
     });
 
     console.log("✅ User created:", user.id);
+
+    // 3. ВАЖНО: Генерируем графики прямо здесь! 
+    // Потому что NextAuth event.createUser НЕ срабатывает при регистрации по паролю.
+    const today = new Date();
+    const barData = Array.from({ length: 30 }).map((_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      return {
+        date: d.toISOString().split('T')[0],
+        desktop: 5,
+        mobile: 5,
+        userId: user.id // используем id только что созданного юзера
+      };
+    });
+
+    const areaData = Array.from({ length: 6 }).map((_, i) => {
+      const d = new Date(today);
+      d.setDate(1);
+      d.setMonth(today.getMonth() + i);
+      return {
+        month: d.toISOString().slice(0, 7),
+        desktop: 5,
+        mobile: 5,
+        userId: user.id
+      };
+    });
+
+    const pieData = [
+      { browser: 'chrome', visitors: 275, userId: user.id },
+      { browser: 'safari', visitors: 200, userId: user.id },
+      { browser: 'firefox', visitors: 287, userId: user.id },
+      { browser: 'edge', visitors: 173, userId: user.id },
+      { browser: 'other', visitors: 190, userId: user.id }
+    ];
+
+    await prisma.$transaction([
+      prisma.dashboardBarChart.createMany({ data: barData }),
+      prisma.dashboardAreaChart.createMany({ data: areaData, skipDuplicates: true }),
+      prisma.dashboardPieChart.createMany({ data: pieData, skipDuplicates: true })
+    ]);
+    console.log(`✅ Данные графиков инициализированы для пользователя: ${user.id}`);
+
     return NextResponse.json({ message: "Регистрация успешна" }, { status: 201 });
 
   } catch (error) {
     const err = error as Error;
     console.error("💥 Error:", err.message);
-    console.error("💥 Stack:", err.stack);
-    return NextResponse.json({ message: err.message }, { status: 500 });
+    // Если ошибка связана с парсингом JSON от клиента
+    if (err instanceof SyntaxError) {
+      return NextResponse.json({ message: "Неверный формат данных от клиента" }, { status: 400 });
+    }
+    return NextResponse.json({ message: "Внутренняя ошибка сервера" }, { status: 500 });
   }
 }

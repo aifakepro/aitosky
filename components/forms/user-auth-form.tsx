@@ -42,7 +42,7 @@ export default function UserAuthForm() {
     setError(null);
 
     if (isRegister) {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: data.email, password: data.password })
