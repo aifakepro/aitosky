@@ -8,24 +8,24 @@ export const runtime = 'nodejs';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    console.log("DEBUG: Получен запрос, тело:", body);
+
     const { email, password, name } = body;
 
-    console.log("Регистрация пользователя:", email);
-
     if (!email || !password) {
+      console.log("DEBUG: Ошибка - нет email или пароля");
       return NextResponse.json({ message: "Заполните почту и пароль" }, { status: 400 });
     }
 
-    // Проверяем, нет ли уже такого юзера
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return NextResponse.json({ message: "Пользователь с таким email уже существует" }, { status: 400 });
+      console.log("DEBUG: Ошибка - юзер уже есть");
+      return NextResponse.json({ message: "Пользователь уже существует" }, { status: 400 });
     }
 
-    // Хешируем пароль
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log("DEBUG: Пароль захэширован, создаем юзера...");
 
-    // 1. Создаем пользователя
     const user = await prisma.user.create({
       data: {
         email,
@@ -77,8 +77,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Регистрация успешна" }, { status: 201 });
 
   } catch (error: any) {
-    console.error("Ошибка при регистрации:", error);
-    // Возвращаем текст ошибки, чтобы было понятно, почему 400 или 500
-    return NextResponse.json({ message: error.message || "Ошибка сервера" }, { status: 500 });
+    console.error("DEBUG: КРИТИЧЕСКАЯ ОШИБКА:", error);
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
