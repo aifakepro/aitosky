@@ -57,7 +57,8 @@ export async function POST(req: Request) {
         month: d.toISOString().slice(0, 7),
         desktop: 5,
         mobile: 5,
-        userId
+        userId,
+        updatedAt: new Date() // <--- ЭТО РЕШИТ ПРОБЛЕМУ
       };
     });
 
