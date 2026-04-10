@@ -29,7 +29,7 @@ import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangleIcon, Trash, Trash2Icon } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 interface ProfileFormType {
@@ -86,6 +86,49 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
     name: 'jobs'
   });
 
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const res = await fetch('/api/user/profile');
+        if (!res.ok) return;
+        const profile = await res.json();
+        if (!profile) return;
+
+        form.reset({
+          firstname: profile.firstname ?? '',
+          lastname: profile.lastname ?? '',
+          email: profile.email ?? '',
+          contactno: profile.contactno ? Number(profile.contactno) : 0,
+          country: profile.country ?? '',
+          city: profile.city ?? '',
+          jobs: profile.jobs?.length
+            ? profile.jobs.map((j: any) => ({
+                jobtitle: j.jobtitle,
+                employer: j.employer,
+                startdate: j.startdate,
+                enddate: j.enddate,
+                jobcountry: j.jobcountry,
+                jobcity: j.jobcity
+              }))
+            : [
+                {
+                  jobtitle: '',
+                  employer: '',
+                  startdate: '',
+                  enddate: '',
+                  jobcountry: '',
+                  jobcity: ''
+                }
+              ]
+        });
+      } catch (e) {
+        console.error('Failed to load profile', e);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
   const onSubmit = async (data: ProfileFormValues) => {
     try {
       setLoading(true);
@@ -116,11 +159,37 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
     }
   };
 
-  const processForm: SubmitHandler<ProfileFormValues> = (data) => {
+  const processForm: SubmitHandler<ProfileFormValues> = async (data) => {
     console.log('data ==>', data);
     setData(data);
-    // api call and reset
-    // form.reset();
+
+    // Если мы на последнем шаге - отправляем на сервер
+    if (currentStep === steps.length - 1) {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/user/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save profile');
+        }
+
+        const result = await response.json();
+        console.log('Profile saved:', result);
+
+        // Успешно сохранено - перенаправляем
+        router.push('/dashboard');
+        router.refresh();
+      } catch (error) {
+        console.error('Error saving profile:', error);
+        alert('Failed to save profile. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   type FieldName = keyof ProfileFormValues;
@@ -146,8 +215,7 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
           // Add other field names as needed
         ])
         .flat()
-    },
-    { id: 'Step 3', name: 'Complete' }
+    }
   ];
 
   const next = async () => {
@@ -160,7 +228,7 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
     if (!output) return;
 
     if (currentStep < steps.length - 1) {
-      if (currentStep === steps.length - 2) {
+      if (currentStep === steps.length - 1) {
         await form.handleSubmit(processForm)();
       }
       setPreviousStep(currentStep);
@@ -175,7 +243,89 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
     }
   };
 
-  const countries = [{ id: 'wow', name: 'india' }];
+  const countries = [
+    { id: 'af', name: 'Afghanistan' },
+    { id: 'al', name: 'Albania' },
+    { id: 'dz', name: 'Algeria' },
+    { id: 'ar', name: 'Argentina' },
+    { id: 'am', name: 'Armenia' },
+    { id: 'au', name: 'Australia' },
+    { id: 'at', name: 'Austria' },
+    { id: 'az', name: 'Azerbaijan' },
+    { id: 'bh', name: 'Bahrain' },
+    { id: 'bd', name: 'Bangladesh' },
+    { id: 'by', name: 'Belarus' },
+    { id: 'be', name: 'Belgium' },
+    { id: 'br', name: 'Brazil' },
+    { id: 'bg', name: 'Bulgaria' },
+    { id: 'ca', name: 'Canada' },
+    { id: 'cl', name: 'Chile' },
+    { id: 'cn', name: 'China' },
+    { id: 'co', name: 'Colombia' },
+    { id: 'hr', name: 'Croatia' },
+    { id: 'cz', name: 'Czech Republic' },
+    { id: 'dk', name: 'Denmark' },
+    { id: 'eg', name: 'Egypt' },
+    { id: 'ee', name: 'Estonia' },
+    { id: 'fi', name: 'Finland' },
+    { id: 'fr', name: 'France' },
+    { id: 'ge', name: 'Georgia' },
+    { id: 'de', name: 'Germany' },
+    { id: 'gr', name: 'Greece' },
+    { id: 'hu', name: 'Hungary' },
+    { id: 'in', name: 'India' },
+    { id: 'id', name: 'Indonesia' },
+    { id: 'iq', name: 'Iraq' },
+    { id: 'ir', name: 'Iran' },
+    { id: 'ie', name: 'Ireland' },
+    { id: 'il', name: 'Israel' },
+    { id: 'it', name: 'Italy' },
+    { id: 'jp', name: 'Japan' },
+    { id: 'jo', name: 'Jordan' },
+    { id: 'kz', name: 'Kazakhstan' },
+    { id: 'ke', name: 'Kenya' },
+    { id: 'kw', name: 'Kuwait' },
+    { id: 'kg', name: 'Kyrgyzstan' },
+    { id: 'lv', name: 'Latvia' },
+    { id: 'lt', name: 'Lithuania' },
+    { id: 'lu', name: 'Luxembourg' },
+    { id: 'my', name: 'Malaysia' },
+    { id: 'mx', name: 'Mexico' },
+    { id: 'md', name: 'Moldova' },
+    { id: 'mn', name: 'Mongolia' },
+    { id: 'ma', name: 'Morocco' },
+    { id: 'nl', name: 'Netherlands' },
+    { id: 'nz', name: 'New Zealand' },
+    { id: 'ng', name: 'Nigeria' },
+    { id: 'no', name: 'Norway' },
+    { id: 'pk', name: 'Pakistan' },
+    { id: 'ph', name: 'Philippines' },
+    { id: 'pl', name: 'Poland' },
+    { id: 'pt', name: 'Portugal' },
+    { id: 'qa', name: 'Qatar' },
+    { id: 'ro', name: 'Romania' },
+    { id: 'ru', name: 'Russia' },
+    { id: 'sa', name: 'Saudi Arabia' },
+    { id: 'rs', name: 'Serbia' },
+    { id: 'sg', name: 'Singapore' },
+    { id: 'sk', name: 'Slovakia' },
+    { id: 'za', name: 'South Africa' },
+    { id: 'kr', name: 'South Korea' },
+    { id: 'es', name: 'Spain' },
+    { id: 'se', name: 'Sweden' },
+    { id: 'ch', name: 'Switzerland' },
+    { id: 'tw', name: 'Taiwan' },
+    { id: 'tj', name: 'Tajikistan' },
+    { id: 'th', name: 'Thailand' },
+    { id: 'tr', name: 'Turkey' },
+    { id: 'tm', name: 'Turkmenistan' },
+    { id: 'ua', name: 'Ukraine' },
+    { id: 'ae', name: 'United Arab Emirates' },
+    { id: 'gb', name: 'United Kingdom' },
+    { id: 'us', name: 'United States' },
+    { id: 'uz', name: 'Uzbekistan' },
+    { id: 'vn', name: 'Vietnam' }
+  ];
   const cities = [{ id: '2', name: 'Karnataka' }];
 
   return (
@@ -331,7 +481,7 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
                             />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="max-h-60 overflow-y-auto">
                           {/* @ts-ignore  */}
                           {countries.map((country) => (
                             <SelectItem key={country.id} value={country.id}>
@@ -350,29 +500,13 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>City</FormLabel>
-                      <Select
-                        disabled={loading}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue
-                              defaultValue={field.value}
-                              placeholder="Select a city"
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {/* @ts-ignore  */}
-                          {cities.map((city) => (
-                            <SelectItem key={city.id} value={city.id}>
-                              {city.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input
+                          disabled={loading}
+                          placeholder="Enter your city"
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -505,7 +639,7 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
                                       />
                                     </SelectTrigger>
                                   </FormControl>
-                                  <SelectContent>
+                                  <SelectContent className="max-h-60 overflow-y-auto">
                                     {countries.map((country) => (
                                       <SelectItem
                                         key={country.id}
@@ -526,28 +660,14 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Job city</FormLabel>
-                                <Select
-                                  disabled={loading}
-                                  onValueChange={field.onChange}
-                                  value={field.value}
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue
-                                        defaultValue={field.value}
-                                        placeholder="Select your job city"
-                                      />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {cities.map((city) => (
-                                      <SelectItem key={city.id} value={city.id}>
-                                        {city.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <FormControl>
+                                  <Input
+                                    type="text"
+                                    disabled={loading}
+                                    placeholder="Enter city"
+                                    {...field}
+                                  />
+                                </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -561,30 +681,34 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
                 <div className="mt-4 flex justify-center">
                   <Button
                     type="button"
-                    className="flex justify-center"
-                    size={'lg'}
-                    onClick={() =>
-                      append({
-                        jobtitle: '',
-                        employer: '',
-                        startdate: '',
-                        enddate: '',
-                        jobcountry: '',
-                        jobcity: ''
-                      })
-                    }
+                    size="lg"
+                    disabled={loading}
+                    onClick={form.handleSubmit(processForm)}
                   >
-                    Add More
+                    {loading ? 'Saving...' : 'Save'}
                   </Button>
                 </div>
               </>
             )}
             {currentStep === 2 && (
-              <div>
-                <h1>Completed</h1>
-                <pre className="whitespace-pre-wrap">
-                  {JSON.stringify(data)}
+              <div className="space-y-4">
+                <h1 className="text-2xl font-semibold">Completed</h1>
+                <p className="text-muted-foreground">
+                  Review your information before saving
+                </p>
+                <pre className="whitespace-pre-wrap rounded-md bg-muted p-4">
+                  {JSON.stringify(data, null, 2)}
                 </pre>
+                <Button
+                  onClick={async () => {
+                    await processForm(data as ProfileFormValues);
+                  }}
+                  disabled={loading}
+                  size="lg"
+                  className="w-full"
+                >
+                  {loading ? 'Saving...' : 'Save Profile'}
+                </Button>
               </div>
             )}
           </div>

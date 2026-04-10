@@ -1,17 +1,12 @@
+'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Task } from '@/lib/store';
+import { Task } from '@/lib/store'; // Берем актуальный тип из стора
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cva } from 'class-variance-authority';
 import { GripVertical } from 'lucide-react';
 import { Badge } from '../ui/badge';
-
-// export interface Task {
-//   id: UniqueIdentifier;
-//   columnId: ColumnId;
-//   content: string;
-// }
 
 interface TaskCardProps {
   task: Task;
@@ -53,7 +48,7 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
     variants: {
       dragging: {
         over: 'ring-2 opacity-30 rounded-md',
-        overlay: 'ring-2 ring-primary rounded-md'
+        overlay: 'ring-2 ring-primary rounded-md shadow-2xl'
       }
     }
   });
@@ -74,14 +69,19 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
           className="-ml-2 h-auto cursor-grab p-1 text-secondary-foreground/50"
         >
           <span className="sr-only">Move task</span>
-          <GripVertical />
+          <GripVertical size={18} />
         </Button>
         <Badge variant={'outline'} className="ml-auto font-semibold">
           Task
         </Badge>
       </CardHeader>
       <CardContent className="whitespace-pre-wrap px-3 pb-6 pt-3 text-left text-sm font-normal">
-        {task.title}
+        <div className="font-medium text-foreground">{task.title}</div>
+        {task.description && (
+          <div className="mt-2 text-xs text-muted-foreground">
+            {task.description}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

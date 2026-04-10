@@ -5,7 +5,8 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  useReactTable
+  useReactTable,
+  getPaginationRowModel
 } from '@tanstack/react-table';
 
 import {
@@ -35,7 +36,13 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel()
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 5 // ← уменьши чтобы проверить
+      }
+    }
   });
 
   /* this can be used to get the selectedrows 

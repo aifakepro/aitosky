@@ -63,6 +63,8 @@ function Calendar({
         IconRight: ({ ...props }) => <ChevronRightIcon className="h-4 w-4" />
       }}
       {...props}
+      defaultMonth={new Date()}
+      today={new Date()}
     />
   );
 }

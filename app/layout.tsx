@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import Providers from '@/components/layout/providers';
 import { Toaster } from '@/components/ui/toaster';
 import '@uploadthing/react/styles.css';
@@ -10,19 +11,22 @@ import { auth } from '@/auth';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://teampulse18.netlify.app/'),
+  metadataBase: new URL('https://aitosky.vercel.app/'),
   title: 'TeamPulse - Next.js/Shadcn Dashboard',
-  description: 'Sophisticated dashboard built with Next.js 14 and Shadcn UI components for efficient team management and productivity tracking.',
-  keywords: 'dashboard, Next.js, Shadcn UI, team management, productivity tracking, analytics, project management, collaboration',
+  description:
+    'Sophisticated dashboard built with Next.js 14 and Shadcn UI components for efficient team management and productivity tracking.',
+  keywords:
+    'dashboard, Next.js, Shadcn UI, team management, productivity tracking, analytics, project management, collaboration',
   openGraph: {
     type: 'website',
-    url: 'https://teampulse18.netlify.app/',
+    url: 'https://aitosky.vercel.app/',
     title: 'TeamPulse - Advanced Next.js Dashboard Solution',
-    description: 'Empower your team with TeamPulse, a cutting-edge dashboard built on Next.js 14 and Shadcn UI. Track productivity, manage projects, and boost collaboration.',
+    description:
+      'Empower your team with TeamPulse, a cutting-edge dashboard built on Next.js 14 and Shadcn UI. Track productivity, manage projects, and boost collaboration.',
     siteName: 'TeamPulse',
     images: [
       {
-        url: 'https://teampulse18.netlify.app/opengraph-image.png',
+        url: 'https://aitosky.vercel.app/opengraph-image.png',
         width: 1200,
         height: 630,
         alt: 'TeamPulse Dashboard Preview'
@@ -33,7 +37,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'TeamPulse - Advanced Next.js Dashboard Solution',
     description: `Elevate your team's performance with TeamPulse, featuring state- of - the - art analytics and project management tools.`,
-    images: ['https://teampulse18.netlify.app/opengraph-image.png']
+    images: ['https://aitosky.vercel.app/opengraph-image.png']
   },
   icons: {
     icon: '/favicon.ico',
@@ -44,7 +48,7 @@ export const metadata: Metadata = {
       'en-US': '/en-US',
       'es-ES': '/es-ES'
     },
-    canonical: 'https://teampulse18.netlify.app/'
+    canonical: 'https://aitosky.vercel.app/'
   },
   authors: [{ name: 'Manjunath R' }],
   robots: {
@@ -59,7 +63,8 @@ export const metadata: Metadata = {
     }
   },
   applicationName: 'TeamPulse',
-  category: 'Business, Productivity, Team Management, Analytics, Next.js Dashboard, Next.js Starter Template, Next-TS-Shadcn'
+  category:
+    'Business, Productivity, Team Management, Analytics, Next.js Dashboard, Next.js Starter Template, Next-TS-Shadcn'
 };
 
 export default async function RootLayout({
@@ -67,11 +72,18 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  // Добавляем .catch, чтобы билд не падал, если сессия не может провериться при сборке
+  const session = await auth().catch(() => null);
+
   return (
     <html lang="en">
+      {/* 
+        overflow-x-hidden: убирает горизонтальную тряску 
+        overflow-y-auto: разрешает скролл на мобилках (по умолчанию)
+        md:overflow-hidden: ЗАПРЕЩАЕТ скролл на ПК (от 768px и выше)
+      */}
       <body
-        className={`${inter.className} overflow-hidden `}
+        className={`${inter.className} overflow-y-auto overflow-x-hidden md:overflow-hidden`}
         suppressHydrationWarning={true}
       >
         <NextTopLoader showSpinner={false} />

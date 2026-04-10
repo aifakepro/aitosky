@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://teampulse18.netlify.app/';
+  const baseUrl = 'https://aitosky.vercel.app/';
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,

@@ -1,6 +1,6 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { KanbanBoard } from '@/components/kanban/kanban-board';
-import NewTaskDialog from '@/components/kanban/new-task-dialog';
+// Удалили импорт NewTaskDialog, так как он теперь внутри колонок
 import PageContainer from '@/components/layout/page-container';
 import { Heading } from '@/components/ui/heading';
 
@@ -16,7 +16,7 @@ export default function page() {
         <Breadcrumbs items={breadcrumbItems} />
         <div className="flex items-start justify-between">
           <Heading title={`Kanban`} description="Manage tasks by dnd" />
-          <NewTaskDialog />
+          {/* Удалили NewTaskDialog отсюда, чтобы не было ошибки columnId */}
         </div>
         <KanbanBoard />
       </div>

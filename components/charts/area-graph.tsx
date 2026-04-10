@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { TrendingUp } from 'lucide-react';
-import { Area, AreaChart, CartesianGrid, XAxis, ResponsiveContainer } from 'recharts';
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 import {
   Card,
   CardContent,
@@ -17,11 +17,28 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from '@/components/ui/chart';
-import { revalidatePath } from 'next/cache';
 
-export const description = "An area chart with gradient fill and refined layout"
+export const description = 'An area chart with gradient fill and dynamic data';
 
-const chartData = [
+// Конфигурация цветов (используем CSS-переменные из темы)
+const chartConfig = {
+  desktop: {
+    label: 'Desktop',
+    color: 'hsl(var(--chart-1))'
+  },
+  mobile: {
+    label: 'Mobile',
+    color: 'hsl(var(--chart-2))'
+  }
+} satisfies ChartConfig;
+
+// Типизация для входящих данных (JSON)
+interface AreaGraphProps {
+  data?: { month: string; desktop: number; mobile: number }[];
+}
+
+// Дефолтные данные на случай, если пропс data не передан
+const defaultChartData = [
   { month: 'Jan', desktop: 186, mobile: 80 },
   { month: 'Feb', desktop: 305, mobile: 200 },
   { month: 'Mar', desktop: 237, mobile: 120 },
@@ -30,122 +47,101 @@ const chartData = [
   { month: 'Jun', desktop: 214, mobile: 140 }
 ];
 
-const chartConfig = {
-  desktop: {
-    label: 'Desktop',
-    color: 'hsl(252.12121212121215, 98.01980198019803%, 60.392156862745104%)'
-  },
-  mobile: {
-    label: 'Mobile',
-    color: 'hsl(172.94117647058823, 90.33816425120776%, 59.411764705882355%)'
-  }
-} satisfies ChartConfig;
-
-const useMediaQuery = (query: any) => {
-  const [matches, setMatches] = React.useState(false);
-
-  React.useEffect(() => {
-    const media = window.matchMedia(query);
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
-    const listener = () => setMatches(media.matches);
-    window.addEventListener('resize', listener);
-    return () => window.removeEventListener('resize', listener);
-  }, [matches, query]);
-
-  return matches;
-};
-
-export function AreaGraph() {
-  const isLargeScreen = useMediaQuery('(min-width: 1024px)');
-  useEffect(() => {
-  }, [isLargeScreen])
+export function AreaGraph({ data = defaultChartData }: AreaGraphProps) {
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="pb-0">
         <CardTitle>Area Chart - Gradient</CardTitle>
         <CardDescription>
           Showing total visitors for the last 6 months
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="h-fit md:h-[300px]">
-          <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                accessibilityLayer
-                data={chartData}
-                margin={{
-                  top: 0,
-                  left: 12,
-                  right: 12,
-                  bottom: isLargeScreen ? 60 : 0
-                }}
-              >
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tickLine={true}
-                  axisLine={true}
-                  tickMargin={8}
-                  tickFormatter={(value) => value.slice(0, 3)}
+      <CardContent className="px-2 pt-0 sm:p-6 sm:pt-0">
+        {/* aspect-auto и h-[310px] фиксируют высоту, чтобы график не улетал вниз */}
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[320px] w-full"
+        >
+          <AreaChart
+            accessibilityLayer
+            data={data}
+            margin={{
+              top: 12,
+              left: 12,
+              right: 12,
+              bottom: 0
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              // ИСПРАВЛЕННЫЙ ФОРМАТТЕР:
+              tickFormatter={(value) => {
+                if (!value) return '';
+                // Создаем дату из строки "2024-01" (добавляем "-01" для корректного парсинга)
+                const date = new Date(value + '-01');
+                // Возвращаем короткое название месяца (напр. "Jan" или "Янв")
+                return date.toLocaleString('en-US', { month: 'short' });
+                // Если хочешь на русском, замени 'en-US' на 'ru-RU'
+              }}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent indicator="dot" />}
+            />
+            <defs>
+              <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-desktop)"
+                  stopOpacity={0.8}
                 />
-                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                <defs>
-                  <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="5%"
-                      stopColor="var(--color-desktop)"
-                      stopOpacity={0.8}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="var(--color-desktop)"
-                      stopOpacity={0.1}
-                    />
-                  </linearGradient>
-                  <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="5%"
-                      stopColor="var(--color-mobile)"
-                      stopOpacity={0.8}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="var(--color-mobile)"
-                      stopOpacity={0.1}
-                    />
-                  </linearGradient>
-                </defs>
-                <Area
-                  dataKey="mobile"
-                  type="natural"
-                  fill="url(#fillMobile)"
-                  fillOpacity={0.4}
-                  stroke="var(--color-mobile)"
-                  stackId="a"
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-desktop)"
+                  stopOpacity={0.1}
                 />
-                <Area
-                  dataKey="desktop"
-                  type="natural"
-                  fill="url(#fillDesktop)"
-                  fillOpacity={0.4}
-                  stroke="var(--color-desktop)"
-                  stackId="a"
+              </linearGradient>
+              <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-mobile)"
+                  stopOpacity={0.8}
                 />
-              </AreaChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </div>
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-mobile)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+            </defs>
+            <Area
+              dataKey="mobile"
+              type="natural"
+              fill="url(#fillMobile)"
+              fillOpacity={0.4}
+              stroke="var(--color-mobile)"
+              stackId="a"
+            />
+            <Area
+              dataKey="desktop"
+              type="natural"
+              fill="url(#fillDesktop)"
+              fillOpacity={0.4}
+              stroke="var(--color-desktop)"
+              stackId="a"
+            />
+          </AreaChart>
+        </ChartContainer>
       </CardContent>
       <CardFooter className="flex flex-col items-start pt-4">
-        <div className="flex items-center gap-2 text-sm font-medium">
+        <div className="flex items-center gap-2 text-sm font-medium leading-none">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
-        <div className="text-sm text-muted-foreground">
-          January - June 2024
-        </div>
+        <div className="text-sm text-muted-foreground">2026</div>
       </CardFooter>
     </Card>
   );
