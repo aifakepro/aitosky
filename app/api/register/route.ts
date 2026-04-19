@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { sendEmail } from '@/lib/mailer';
+import crypto from 'crypto';
 
 export async function POST(req: Request) {
   try {
@@ -29,6 +31,42 @@ export async function POST(req: Request) {
     });
 
     console.log("✅ User created:", user.id);
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 часа
+
+    await prisma.verificationToken.create({
+      data: {
+        identifier: email,
+        token,
+        expires
+      }
+    });
+
+    const verifyUrl = `${process.env.NEXTAUTH_URL ?? 'https://aitosky.vercel.app'}/api/verify?token=${token}&email=${encodeURIComponent(email)}`;
+
+    await sendEmail({
+      to: email,
+      subject: 'Confirm your email — AiToSky',
+      html: `
+    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+      <h2>Welcome to AiToSky!</h2>
+      <p>Click the button below to confirm your email:</p>
+      <a href="${verifyUrl}" style="
+        display: inline-block;
+        padding: 12px 24px;
+        background: #000;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;
+      ">Confirm email</a>
+      <p style="color: #888; font-size: 13px;">
+        Link expires in 24 hours.
+      </p>
+    </div>
+  `
+    });
 
     // 3. ВАЖНО: Генерируем графики прямо здесь! 
     // Потому что NextAuth event.createUser НЕ срабатывает при регистрации по паролю.
