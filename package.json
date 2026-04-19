@@ -63,6 +63,7 @@
     "next-auth": "^5.0.0-beta.18",
     "next-themes": "^0.2.1",
     "nextjs-toploader": "^1.6.12",
+    "nodemailer": "^8.0.5",
     "pg": "^8.18.0",
     "postcss": "^8.4.47",
     "react": "^18.2.0",
@@ -83,6 +84,7 @@
   "devDependencies": {
     "@prisma/client": "^7.5.0",
     "@prisma/config": "^7.4.0",
+    "@types/nodemailer": "^8.0.0",
     "@types/pg": "^8.16.0",
     "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^6.11.0",

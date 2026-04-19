@@ -78,7 +78,6 @@ export async function POST(req: Request) {
   `
     });
 
-    
     const today = new Date();
     const barData = Array.from({ length: 30 }).map((_, i) => {
       const d = new Date(today);
