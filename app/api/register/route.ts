@@ -14,12 +14,7 @@ export async function POST(req: Request) {
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      const hasOAuth = await prisma.account.findFirst({ where: { userId: existingUser.id } });
-      return NextResponse.json({
-        message: hasOAuth
-          ? "Этот email уже привязан к Google/GitHub — войдите через них"
-          : "Email уже используется"
-      }, { status: 400 });
+      return NextResponse.json({ message: "Email уже используется" }, { status: 400 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
