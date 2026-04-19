@@ -17,13 +17,27 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import GithubSignInButton from '../github-auth-button';
 import GoogleSignInButton from '../google-auth-button';
+import { Eye, EyeOff } from 'lucide-react';
 
-const formSchema = z.object({
+const signInSchema = z.object({
   email: z.string().email({ message: 'Enter a valid email address' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters' })
 });
 
-type UserFormValue = z.infer<typeof formSchema>;
+const registerSchema = z
+  .object({
+    email: z.string().email({ message: 'Enter a valid email address' }),
+    password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+    confirmPassword: z.string().min(6, { message: 'Please confirm your password' })
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword']
+  });
+
+type SignInFormValue = z.infer<typeof signInSchema>;
+type RegisterFormValue = z.infer<typeof registerSchema>;
+type UserFormValue = SignInFormValue & { confirmPassword?: string };
 
 export default function UserAuthForm() {
   const searchParams = useSearchParams();
@@ -32,9 +46,13 @@ export default function UserAuthForm() {
   const [isRegister, setIsRegister] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Visibility toggles for each password field
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const form = useForm<UserFormValue>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { email: '', password: '' }
+    resolver: zodResolver(isRegister ? registerSchema : signInSchema),
+    defaultValues: { email: '', password: '', confirmPassword: '' }
   });
 
   const onSubmit = async (data: UserFormValue) => {
@@ -72,10 +90,19 @@ export default function UserAuthForm() {
     window.location.href = callbackUrl ?? '/dashboard';
   };
 
+  const handleToggleMode = () => {
+    setIsRegister(!isRegister);
+    setError(null);
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+    form.reset({ email: '', password: '', confirmPassword: '' });
+  };
+
   return (
     <>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
+          {/* Email */}
           <FormField
             control={form.control}
             name="email"
@@ -94,6 +121,8 @@ export default function UserAuthForm() {
               </FormItem>
             )}
           />
+
+          {/* Password */}
           <FormField
             control={form.control}
             name="password"
@@ -101,21 +130,65 @@ export default function UserAuthForm() {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Enter your password..."
-                    disabled={loading}
-                    {...field}
-                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Enter your password..."
+                      disabled={loading}
+                      className="pr-10"
+                      {...field}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      tabIndex={-1}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
+          {/* Confirm Password — only shown during registration */}
+          {isRegister && (
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        placeholder="Repeat your password..."
+                        disabled={loading}
+                        className="pr-10"
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword((v) => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        tabIndex={-1}
+                        aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           )}
+
+          {error && <p className="text-sm text-red-500">{error}</p>}
 
           <Button disabled={loading} className="ml-auto w-full" type="submit">
             {isRegister ? 'Create account' : 'Sign in'}
@@ -127,7 +200,7 @@ export default function UserAuthForm() {
         {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
         <button
           type="button"
-          onClick={() => { setIsRegister(!isRegister); setError(null); }}
+          onClick={handleToggleMode}
           className="underline underline-offset-4 hover:text-primary"
         >
           {isRegister ? 'Sign in' : 'Register'}
@@ -139,9 +212,7 @@ export default function UserAuthForm() {
           <span className="w-full border-t" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
-          </span>
+          <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
         </div>
       </div>
       <GoogleSignInButton />
