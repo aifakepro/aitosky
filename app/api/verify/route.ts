@@ -26,7 +26,7 @@ export async function GET(req: Request) {
   // Помечаем email как подтверждённый
   await prisma.user.update({
     where: { email },
-    data: { emailVerified: new Date() }
+    data: { emailVerified: new Date() } 
   });
 
   // Удаляем использованный токен
