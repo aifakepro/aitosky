@@ -18,6 +18,7 @@ import * as z from 'zod';
 import GithubSignInButton from '../github-auth-button';
 import GoogleSignInButton from '../google-auth-button';
 import { Eye, EyeOff } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const signInSchema = z.object({
   email: z.string().email({ message: 'Enter a valid email address' }),
@@ -45,6 +46,7 @@ export default function UserAuthForm() {
   const [loading, setLoading] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   // Visibility toggles for each password field
   const [showPassword, setShowPassword] = useState(false);
@@ -153,6 +155,18 @@ export default function UserAuthForm() {
               </FormItem>
             )}
           />
+
+          {!isRegister && (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => router.push('/forgot-password')}
+                className="text-xs text-muted-foreground underline underline-offset-4 hover:text-primary"
+              >
+                Forgot password?
+              </button>
+            </div>
+          )}
 
           {/* Confirm Password — only shown during registration */}
           {isRegister && (
