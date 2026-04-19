@@ -36,7 +36,6 @@ const registerSchema = z
   });
 
 type SignInFormValue = z.infer<typeof signInSchema>;
-type RegisterFormValue = z.infer<typeof registerSchema>;
 type UserFormValue = SignInFormValue & { confirmPassword?: string };
 
 export default function UserAuthForm() {
