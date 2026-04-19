@@ -15,10 +15,13 @@ const authConfig: NextAuthConfig = {
     })
   ],
   pages: {
-    signIn: '/'
+    signIn: '/',
+    error: '/',
   },
-  // УДАЛИТЕ EVENTS - они не работают в edge
   callbacks: {
+    async signIn({ account }) {
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as any).role;
