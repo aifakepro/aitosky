@@ -53,6 +53,12 @@ export const { auth, handlers, signOut, signIn } = NextAuth({
     async createUser({ user }) {
       if (!user?.id) return;
 
+      // Проверяем есть ли уже данные
+      const existing = await prisma.dashboardBarChart.findFirst({
+        where: { userId: user.id }
+      });
+      if (existing) return;
+
       const userId = user.id;
       const today = new Date();
 
