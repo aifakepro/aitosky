@@ -1,16 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import nodemailer from "nodemailer";
-import crypto from "crypto";
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD
-  }
-});
 
 export async function POST(req: Request) {
   try {
@@ -39,45 +29,7 @@ export async function POST(req: Request) {
 
     console.log("✅ User created:", user.id);
 
-    // --- Генерация токена верификации ---
-    const token = crypto.randomBytes(32).toString("hex");
-    const expires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 часа
-
-    await prisma.verificationToken.create({
-      data: {
-        identifier: email,
-        token,
-        expires
-      }
-    });
-
-    // --- Отправка письма ---
-    const verifyUrl = `${process.env.NEXTAUTH_URL}/api/verify?token=${token}&email=${encodeURIComponent(email)}`;
-
-    await transporter.sendMail({
-      from: `"AiToSky" <${process.env.GMAIL_USER}>`,
-      to: email,
-      subject: "Confirm your email — AiToSky",
-      html: `
-    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-      <h2>Welcome to AiToSky!</h2>
-      <p>Click the button below to confirm your email address:</p>
-      <a href="${verifyUrl}" style="
-        display: inline-block;
-        padding: 12px 24px;
-        background: #000;
-        color: #fff;
-        text-decoration: none;
-        border-radius: 6px;
-        font-weight: bold;
-      ">Confirm email</a>
-      <p style="margin-top: 16px; color: #888; font-size: 13px;">
-        Link expires in 24 hours. If you didn't register, ignore this email.
-      </p>
-    </div>
-  `
-    });
-
+    
     const today = new Date();
     const barData = Array.from({ length: 30 }).map((_, i) => {
       const d = new Date(today);
