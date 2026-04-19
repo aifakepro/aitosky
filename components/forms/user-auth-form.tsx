@@ -27,7 +27,7 @@ const signInSchema = z.object({
 const registerSchema = z
   .object({
     email: z.string().email({ message: 'Enter a valid email address' }),
-    password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+    password: z.string().min(6, { message: 'Password must be at least 6 characters' }).regex(/^[a-zA-Z0-9!@#$%^&*]+$/, { message: 'Only Latin letters and digits' }),
     confirmPassword: z.string().min(6, { message: 'Please confirm your password' })
   })
   .refine((data) => data.password === data.confirmPassword, {
