@@ -4,21 +4,22 @@ import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
-    
+    // 1. Правильный парсинг JSON в Next.js
     const body = await req.json();
     const { email, password, name } = body;
 
     if (!email || !password) {
-      return NextResponse.json({ message: "Enter your email and password" }, { status: 400 });
+      return NextResponse.json({ message: "Заполните почту и пароль" }, { status: 400 });
     }
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return NextResponse.json({ message: "This email is already linked to Google/GitHub - sign in through them" }, { status: 400 });
+      return NextResponse.json({ message: "Email уже используется" }, { status: 400 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // 2. Создаем пользователя
     const user = await prisma.user.create({
       data: {
         email,
@@ -29,7 +30,8 @@ export async function POST(req: Request) {
 
     console.log("✅ User created:", user.id);
 
-    
+    // 3. ВАЖНО: Генерируем графики прямо здесь! 
+    // Потому что NextAuth event.createUser НЕ срабатывает при регистрации по паролю.
     const today = new Date();
     const barData = Array.from({ length: 30 }).map((_, i) => {
       const d = new Date(today);
@@ -38,7 +40,7 @@ export async function POST(req: Request) {
         date: d.toISOString().split('T')[0],
         desktop: 5,
         mobile: 5,
-        userId: user.id 
+        userId: user.id // используем id только что созданного юзера
       };
     });
 
@@ -67,17 +69,17 @@ export async function POST(req: Request) {
       prisma.dashboardAreaChart.createMany({ data: areaData, skipDuplicates: true }),
       prisma.dashboardPieChart.createMany({ data: pieData, skipDuplicates: true })
     ]);
-    console.log(`✅ Graph data has been initialized for the user: ${user.id}`);
+    console.log(`✅ Данные графиков инициализированы для пользователя: ${user.id}`);
 
-    return NextResponse.json({ message: "Registration successful" }, { status: 201 });
+    return NextResponse.json({ message: "Регистрация успешна" }, { status: 201 });
 
   } catch (error) {
     const err = error as Error;
     console.error("💥 Error:", err.message);
     // Если ошибка связана с парсингом JSON от клиента
     if (err instanceof SyntaxError) {
-      return NextResponse.json({ message: "Invalid data format from the client" }, { status: 400 });
+      return NextResponse.json({ message: "Неверный формат данных от клиента" }, { status: 400 });
     }
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ message: "Внутренняя ошибка сервера" }, { status: 500 });
   }
 }
