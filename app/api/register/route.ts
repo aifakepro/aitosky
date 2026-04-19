@@ -74,7 +74,7 @@ export async function POST(req: Request) {
   } catch (error) {
     const err = error as Error;
     console.error("💥 Error:", err.message);
-  
+    // Если ошибка связана с парсингом JSON от клиента
     if (err instanceof SyntaxError) {
       return NextResponse.json({ message: "Invalid data format from the client" }, { status: 400 });
     }
