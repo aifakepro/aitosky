@@ -6,7 +6,7 @@ export async function GET() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       secret: process.env.APPS_SCRIPT_SECRET,
-      to: 'твой@gmail.com',
+      to: 'aifake.pro@gmail.com',
       subject: 'Test email',
       html: '<h1>Работает!</h1>'
     })
