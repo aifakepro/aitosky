@@ -47,6 +47,7 @@ export default function UserAuthForm() {
   const [isRegister, setIsRegister] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const [registered, setRegistered] = useState(false);
 
   // Visibility toggles for each password field
   const [showPassword, setShowPassword] = useState(false);
@@ -74,6 +75,10 @@ export default function UserAuthForm() {
         setLoading(false);
         return;
       }
+
+      setLoading(false);
+      setRegistered(true);
+      return;
     }
 
     const result = await signIn('credentials', {
@@ -203,6 +208,11 @@ export default function UserAuthForm() {
           )}
 
           {error && <p className="text-sm text-red-500">{error}</p>}
+          {registered && (
+            <p className="text-sm text-green-500 text-center">
+              Check your email to confirm your account.
+            </p>
+          )}
 
           <Button disabled={loading} className="ml-auto w-full" type="submit">
             {isRegister ? 'Create account' : 'Sign in'}
