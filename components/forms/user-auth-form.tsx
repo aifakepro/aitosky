@@ -21,14 +21,14 @@ import { Eye, EyeOff } from 'lucide-react';
 
 const signInSchema = z.object({
   email: z.string().email({ message: 'Enter a valid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' })
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }).regex(/^[a-zA-Z0-9!@#$%^&*]+$/, { message: 'Only Latin letters and digits' })
 });
 
 const registerSchema = z
   .object({
     email: z.string().email({ message: 'Enter a valid email address' }),
     password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-    confirmPassword: z.string().min(6, { message: 'Please confirm your password' })
+    confirmPassword: z.string().min(6, { message: 'Please confirm your password' }).regex(/^[a-zA-Z0-9!@#$%^&*]+$/, { message: 'Только латиница и цифры' })
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
